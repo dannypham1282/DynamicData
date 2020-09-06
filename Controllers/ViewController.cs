@@ -175,7 +175,7 @@ namespace DynamicData.Controllers
                             else if (field.FieldType.Type.ToLower() == "radiobutton")
                             {
                                 dtCol.type = "radio";
-                               await  ColumnOptionsAsync(dtCol, field);
+                                await ColumnOptionsAsync(dtCol, field);
                             }
                             else
                                 dtCol.type = "text";
@@ -220,7 +220,7 @@ namespace DynamicData.Controllers
             {
                 if (!string.IsNullOrEmpty(field.DropdownValue))
                 {
-                 
+
                     var dropItems = field.DropdownValue.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     if (dropItems.Length > 0)
                     {
@@ -230,7 +230,7 @@ namespace DynamicData.Controllers
                             {
                                 value = dropItem.Trim(),
                                 label = dropItem.Trim()
-                            }); 
+                            });
                         }
                         dtCol.options = optionList;
                     }
@@ -416,7 +416,7 @@ namespace DynamicData.Controllers
             {
                 var fields = await _iField.FieldCollection(libraryGuid);
                 status = true;
-                return new JsonResult(new { status = status, result = fields.Select(p => new { p.GUID, p.Title }) });    
+                return new JsonResult(new { status = status, result = fields.Select(p => new { p.GUID, p.Title }) });
             }
             catch (Exception ex)
             {
@@ -425,7 +425,7 @@ namespace DynamicData.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> InsertLinkLibrary(Guid field, Guid linkLibrary,Guid dependentField,string linkLibraryName)
+        public async Task<IActionResult> InsertLinkLibrary(Guid field, Guid linkLibrary, Guid dependentField, string linkLibraryName)
         {
             bool status = false;
             string message = "";
@@ -443,6 +443,21 @@ namespace DynamicData.Controllers
             {
                 status = false;
                 return new JsonResult(new { status = status, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ReorderDataTableCol(Guid libraryGuid, string fieldList, string orderList)
+        {
+            bool status = false;
+            string message = "";
+            try
+            {
+                return new JsonResult(new { status = status, result = "Columns re-order completed" });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { status = status, result = ex.Message });
             }
         }
     }
