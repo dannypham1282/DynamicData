@@ -447,7 +447,7 @@ namespace DynamicData.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ReorderDataTableCol(Guid libraryGuid, string fieldList, string orderList)
+        public async Task<IActionResult> ReorderDataTableCol(Guid libraryGuid, string fieldList)
         {
             bool status = false;
             string message = "";
