@@ -1,0 +1,123 @@
+﻿@{ Layout = null; }
+@model DynamicData.Models.Library
+<form id="formLibrary" class="form-horizontal" onsubmit="return libraryFormAction(this,'mCreateLibrary')">
+    @Html.HiddenFor(model => model.ID)
+    @if (Model.ID > 0)
+    {
+
+@Html.HiddenFor(model => model.GUID)}
+    @Html.HiddenFor(model => model.SortOrder)}
+
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary-d3" id="exampleModalLabel">
+                    Modal title
+                </h5>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-3 col-form-label text-sm-right pr-0">
+                        @Html.Label("Parent", "Parent Library", new { @class = "col-form-label text-sm-right" })
+                    </div>
+                    <div class="col-sm-9">
+                        @Html.DropDownListFor(model => model.ParentID, new SelectList(Model.LibraryCollection, "ID", "Title"), "Select Parent Library ", new { @class = "form-control col-xs-10 col-sm-9", @placeholder = "Library Type", @Required = "required" })
+                        <span asp-validation-for="ParentID" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3 col-form-label text-sm-right pr-0">
+                        @Html.LabelFor(x => x.Title, new { @class = "col-form-label text-sm-right" })
+                    </div>
+                    <div class="col-sm-9">
+                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control col-xs-10 col-sm-9 has-error", @placeholder = "Title", @Required = "required" } })
+                        <span asp-validation-for="Title" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3 col-form-label text-sm-right pr-0">
+                        @Html.LabelFor(x => x.Name, new { @class = "col-form-label text-sm-right" })
+                    </div>
+                    <div class="col-sm-9">
+                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control col-xs-10 col-sm-9", @placeholder = "Name", @Required = "required" } })
+                        <span asp-validation-for="Title" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3 col-form-label text-sm-right pr-0">
+                        @Html.LabelFor(x => x.URL, new { @class = "col-form-label text-sm-right" })
+                    </div>
+                    <div class="col-sm-9">
+                        @Html.EditorFor(model => model.URL, new { htmlAttributes = new { @class = "form-control col-xs-10 col-sm-9", @placeholder = "URL" } })
+                        <span asp-validation-for="URL" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3 col-form-label text-sm-right pr-0">
+                        @Html.LabelFor(x => x.Description, new { @class = "col-form-label text-sm-right" })
+                    </div>
+                    <div class="col-sm-9">
+                        @Html.TextAreaFor(model => model.Description, new { maxlength = 1000, @class = "form-control col-sm-9", @placeholder = "Description" })
+                        <span asp-validation-for="Description" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-3 col-form-label text-sm-right pr-0">
+                        @Html.LabelFor(x => x.LibraryType, new { @class = "col-form-label text-sm-right" })
+                    </div>
+                    <div class="col-sm-9">
+                        @Html.DropDownListFor(model => model.LibraryTypeID, new SelectList(Model.LibraryTypeCollection, "ID", "Type"), "Select Library Type", new { @class = "form-control col-xs-10 col-sm-9", @placeholder = "Library Type", @Required = "required" })
+                        <span asp-validation-for="LibraryTypeID" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-3 col-form-label text-sm-right pr-0">
+                        @Html.LabelFor(x => x.MenuType, new { @class = "col-form-label text-sm-right" })
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="mr-1" style="padding-top:10px;">
+                            <label style="display:inline-block">
+                                @Html.RadioButtonFor(model => model.MenuType, "Top Menu") Top Menu
+                            </label>&nbsp; &nbsp;&nbsp;&nbsp;<label>
+                                @Html.RadioButtonFor(model => model.MenuType, "Side Menu")
+                                Side Menu
+                            </label>
+                        </div>
+                        <span asp-validation-for="MenuType" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3 col-form-label text-sm-right pr-0">
+                        @Html.LabelFor(x => x.Visible, new { @class = "col-form-label text-sm-right" })
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="mr-1" style="padding-top:10px;">
+                            <label style="display:inline-block">
+                                @Html.RadioButtonFor(model => model.Visible, "1") Yes
+                            </label>&nbsp; &nbsp;&nbsp;&nbsp;<label>
+                                @Html.RadioButtonFor(model => model.Visible, "0")
+                                No
+                            </label>
+                        </div>
+                        <span asp-validation-for="MenuType" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button data-bb-handler="cancel" type="button" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
+                <button data-bb-handler="confirm" type="submit" class="btn btn-outline-primary" onclick="">Save</button>
+            </div>
+
+        </div>
+    </div>
+</form>

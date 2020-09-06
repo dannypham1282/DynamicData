@@ -1,0 +1,26 @@
+﻿@{ ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml"; }
+<div class="card card-default">
+    <div class="card-header card-warning card-outline">
+        <h3 class="card-title" id="viewCardTitle">
+            @Html.RenderAction("BreadCrumbs", "View")
+        </h3>
+        <div class="card-tools">
+            @*<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                    <i class="fas fa-times"></i>
+                </button>*@
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                Content is here!
+            </div>
+
+        </div>
+    </div>
+
+</div>

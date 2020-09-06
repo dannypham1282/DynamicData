@@ -1,0 +1,90 @@
+﻿@{ Layout = null; }
+@model DynamicData.Models.Field
+<form id="formField" class="form-horizontal" onsubmit="return fieldFormAction(this,'mFieldAction')">
+    @Html.HiddenFor(model => model.ID)
+    @if (Model.ID > 0)
+    {
+
+@Html.HiddenFor(model => model.GUID)}
+
+    @Html.AntiForgeryToken()
+    <div class="modal-dialog modal-lg" role="document" style="width:700px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add New Field</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <!-- text input -->
+
+                        @Html.LabelFor(x => x.Name, new { @class = "col-form-label text-sm-right" })
+                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", @placeholder = "Title", @Required = "required" } })
+                        <span asp-validation-for="Name" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+
+                    </div>
+                    <div class="col-sm-6">
+
+                        @Html.LabelFor(x => x.Title, new { @class = "col-form-label text-sm-right" })
+                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", @placeholder = "Title", @Required = "required" } })
+                        <span asp-validation-for="Title" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        @Html.LabelFor(x => x.Description, new { @class = "col-form-label text-sm-right" })
+                        @Html.TextAreaFor(model => model.Description, new { maxlength = 1000, @class = "form-control", @placeholder = "Description" })
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        @Html.LabelFor(x => x.FieldTypeID, new { @class = "col-form-label text-sm-right" })
+                        @Html.DropDownListFor(model => model.FieldTypeID, new SelectList(Model.FieldTypeCollection, "ID", "Type"), "Select Field Type", new { @class = "form-control", @placeholder = "Field Type", @Required = "required" })
+                        <span asp-validation-for="FieldTypeID" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="custom-control custom-switch" style="padding-top:50px">
+                            @Html.EditorFor(model => model.IsVisible, new { htmlAttributes = new { @class = "custom-control-input" } })
+
+                            @Html.LabelFor(x => x.IsVisible, new { @class = "custom-control-label" })
+                            <span asp-validation-for="IsVisible" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                        </div>
+                        @*@Html.LabelFor(x => x.LookupTable, new { @class = "col-form-label text-sm-right" })
+                            @Html.DropDownListFor(model => model.LookupTable, new SelectList(Model.LibraryCollection, "GUID", "Title"), "Select a Link Library", new { @class = "form-control", @placeholder = "Library Collection", onchange = "getFieldByLookupTable('LookUpValue')" })*@
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="custom-control custom-switch" style="padding-top:50px">
+                            @Html.EditorFor(model => model.IsEditable, new { htmlAttributes = new { @class = "custom-control-input" } })
+                            @Html.LabelFor(x => x.IsEditable, new { @class = "custom-control-label" })
+                            <span asp-validation-for="IsEditable" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="custom-control custom-switch" style="padding-top:50px">
+                            @Html.EditorFor(model => model.IsRequired, new { htmlAttributes = new { @class = "custom-control-input" } })
+                            @Html.LabelFor(x => x.IsRequired, new { @class = "custom-control-label" })
+                            <span asp-validation-for="IsRequired" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        @Html.LabelFor(x => x.DropdownValue, new { @class = "col-form-label text-sm-right" })
+                        @Html.TextAreaFor(model => model.DropdownValue, new { maxlength = 1000, @class = "form-control", @placeholder = "Description" })
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-outline-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+</form>

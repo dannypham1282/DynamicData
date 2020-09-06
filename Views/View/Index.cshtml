@@ -1,0 +1,461 @@
+﻿
+@{ ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml"; }
+
+<div class="card card-default">
+    <div class="card-header card-warning card-outline">
+        <h3 class="card-title" id="viewCardTitle">
+            @Html.RenderAction("BreadCrumbs", "View")
+        </h3>
+        <div class="card-tools">
+            <div class="btn-group position-relative">
+
+                <button type="button" class="btn btn-outline-danger btn-sm dropdown-toggle dropdown-hover" data-toggle="dropdown">
+                    <i class="fa fa-sm fa-cog"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-right" role="menu">
+                    <a class="dropdown-item" href="#" onclick="showFieldModal('@Url.Action("_FieldAction","Partial")', 0, 'mFieldAction', 'formField','@ViewData["libGuid"]'); return false;"><i class="fas fa-plus"></i> Add New Field</a>
+                    <a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Edit Hidden Fields</a>
+                    <a class="dropdown-item" href="#"><i class="fas fa-link"></i> Link Libraries</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#"><i class="fas fa-house-user"></i> Set Permission</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <table id="viewData" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                    <thead><tr></tr></thead>
+                </table>
+                <table>
+                    <tr><td height="10" width="10" class="noedit" style="padding:0.1rem"></td><td width="5"></td><td><b> *note: none edit cell</b></td><td></td><td height="10" width="10" class="noedit"></td></tr>
+                </table>
+                <div class="container demo">
+                    <div class="modal left fade" id="mFieldAction" tabindex="" role="dialog" aria-labelledby="mFieldActionLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+                    </div>
+                </div>
+
+
+                <div class="modal fade" id="modelDeleteFieldConfirm" aria-modal="true" data-backdrop="static" data-keyboard="false">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Comfirmation</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body" id="mConfirmBody">
+                                <p>Are you sure you want to  delete?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-danger" data-dismiss="modal" onclick="doDeleteField()">Yes</button>
+                                <button type="button" class="btn btn-outline-primary" data-dismiss="modal">No</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+            </div>
+
+            <div class="modal fade" id="modelLinkLibrary" aria-modal="true" data-backdrop="static" data-keyboard="false">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Link Another Library</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="divLinkBody">
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-primary" onclick="AddLinkToLibrary()">Link</button>
+                            <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+@section scripts {
+    <script>
+        var editor; // use a global for the submit and return data
+        var viewTable;
+        var editCellUrl = "@Url.Action("UpdateCell", "View")/@ViewData["libGuid"]";
+       // getDataTableColumns();
+
+        $(document).ready(function () {
+            $.fn.dataTable.moment('MM/DD/YYYY');
+            $.fn.dataTable.moment('D-MMM-YY');
+            initialDataTable();
+
+            $("#viewData").find(' thead tr:eq(0)').remove();
+           
+
+
+           // $(".buttons-edit").removeClass("dt-button buttons-selected buttons-edit").addClass("btn btn-sm btn-success").html("<i class=\"fa fa-pencil\"></i><span> Edit </span>");
+           // $(".buttons-remove").removeClass("dt-button buttons-selected buttons-remove ").addClass("btn btn-sm btn-danger").html("<i class=\"fa fa-trash\"></i><span> Delete </span>");
+
+        });
+        var noeditCol;
+        function initialDataTable() {
+            var changetext;
+            var selectedTD;
+
+            $('#viewData thead tr').empty();
+              editor = new $.fn.dataTable.Editor({
+                ajax:
+                {
+                    dataType: 'json',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    create: {
+                        type: 'POST',
+                        url: editCellUrl,
+                        success: function (res) {
+                            if (res.result) {
+                                toastr.success(res.result);
+                                $('#viewData').DataTable().ajax.reload();
+                            }
+                        }
+                    },
+                    edit: {
+                        type: 'POST',
+                        url: editCellUrl,
+                        success: function (res) {
+                            if (res.status) {
+                                $('#viewData').DataTable().ajax.reload();
+                                toastr.success(res.result);
+                            }
+                            else {
+                                toastr.error(res.result);
+                            }
+                        }
+                    },
+                    remove: {
+                        type: 'POST',
+                        url: editCellUrl,
+                        success: function (res) {
+                            $('#viewData').DataTable().ajax.reload();
+                            toastr.success(res.result);
+                        }
+                    },
+                },
+                idSrc: 'id',
+                table: "#viewData",
+                fields: GetAjax('@Url.Action("DataTableColEditor", "View")', '{"guid": "@ViewData["libGuid"]"}').result
+            });
+
+            viewTable = $('#viewData').DataTable({
+                fixedHeader: true,
+                colReorder: true,
+                "aLengthMenu": [[25, 50, 100, -1], [ 25, 50, 100,200,250,300,350,400, "All"]],
+                "language": {
+                    "emptyTable": "No data available in table"
+                },
+                dom: "Blfrtip",
+                columns: getDataTableColumns(),
+                keys: {
+                    columns: ':not(:first-child)',
+                    editor: editor
+                },
+                select: {
+                    style: 'os',
+                    selector: 'td:first-child',
+                    blurable: true
+                 },
+                buttons: [
+                    { extend: "create", editor: editor },
+                  //  { extend: "edit", editor: editor },
+                  //  { extend: "remove", editor: editor }
+                 ],
+                "createdRow": function (row, data, index) {
+                   //  console.log(row)
+                    var tdIndex = $(row).find("td.sysdelete").index();
+                    var currencyIndex = $(row).find("td.classCurrency").index();
+                    var percentageIndex = $(row).find("td.classPercentage").index();
+
+                     if (tdIndex > -1) {//insert delete button
+                         var td = $(row).find("td.sysdelete");
+                         td.html("<button class=\"btn btn-xs btn-danger btn_removerow\" ><i class=\"fa  fa-trash\"></i></button>");
+                     }
+                    if (currencyIndex > -1) {
+                        $(row).find("td.classCurrency").each(function () {
+                            $(this).html(currencyFormat($(this).html()));
+                        });
+
+                    }
+                    if (percentageIndex > -1) {
+                        $(row).find("td.classPercentage").each(function () {
+                            $(this).html(percentageFormat($(this).html()));
+                        });
+                    }
+                 },
+                 "drawCallback": function () {
+                     $("#viewData tr th:first").removeClass("sorting_asc");
+                   
+                     // $("th[class^='dt_id_']").addClass("contextMenu");
+
+                },
+                "rowCallback": function (row, data, index) {
+                 
+                    
+                },
+                "initComplete": function (settings, json) {
+                    appendDeleteButton();
+                },
+                ajax: '@Url.Action("LoadData", "View")/@ViewData["libGuid"]'
+            });
+
+            viewTable.on('column-reorder', function (e, settings, details) {
+                $('#viewData').DataTable().ajax.reload();
+            });
+
+            $(".buttons-create").removeClass("dt-button buttons-create").addClass("btn  btn-outline-primary").html("<i class=\"fa fa-plus\"></i> <span> New Record</span>");
+        }
+
+        $('#viewData').on('click', '.btn_removerow', function (e) {
+            e.preventDefault();
+            editor.remove($(this).closest('tr'), {
+                title: 'Delete record',
+                message: 'Are you sure you wish to remove this record?',
+                buttons: 'Delete'
+            });
+        });
+
+        function appendDeleteButton() {
+            var colButtun = "<div class=\"btn-group position-relative\" style=\"float:right\">";
+            colButtun += "<a href=\"#\" class= \"btn btn-outline-primary btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\"><i class=\"fa fa-sm fa-edit\"></i></a><div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
+            colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"editColumn(this)\"><i class=\"fa fa-edit\"></i> Edit Column</a>";
+            colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showDeleteField(this)\"><i class=\"fa fa-trash\"></i>  Delete Column</a> <div class=\"dropdown-divider\"></div><a class=\"dropdown-item\" href=\"#\" onclick=\"showLinkLibraryModal(this)\"><i class=\"fa fa-link\"></i> Link Other Library</a>";
+            colButtun += "</div>";
+            $("th[class*='dt_id_']").append(colButtun);
+        }
+
+    
+        function currencyFormat(num) {
+            if (isNumeric(num)) {
+                var p = parseFloat(num).toFixed(2).split(".");
+                return "$" + p[0].split("").reverse().reduce(function (acc, num, i, orig) {
+                    return num == "-" ? acc : num + (i && !(i % 3) ? "," : "") + acc;
+                }, "") + "." + p[1];
+
+            }else
+                return '$0.00'
+        }
+
+        function percentageFormat(number, float) {
+            if (isNumeric(number)) {
+                var percent = parseFloat(number).toFixed(float) + "%";
+                return percent;
+            }
+            else
+                return "0%";
+        }
+
+        function isNumeric(value) {
+            return /^-?\d+$/.test(value);
+        }
+
+
+        function getMapKeyValueByIndex(obj, idx) {
+            var key = Object.keys(obj)[idx];
+            return obj[key] ;
+        }
+
+        function getDataTableColumns() {
+            var cols = GetAjax('@Url.Action("DataTableColumnDef", "View")', '{"guid": "@ViewData["libGuid"]"}').result;
+            return cols;
+        }
+
+        function showFieldModal(url, guid, modalId, formId, libraryGuid) {
+            $.get(url, { guid:guid,libraryGuid:libraryGuid}, function (res) {
+                $("#" + modalId).html(res);
+                $("#" + modalId).modal("show");
+            });
+        }
+
+        function fieldFormAction(form, modalId) {
+            var form = $(form);
+            form.validate();
+            if (form.valid()) {
+                 $.ajax(
+                    {
+                        url: '@Url.Action("_ActionField", "Partial")/@ViewData["libGuid"]',
+                        type: 'POST',
+                        data: $(form).serialize(),
+                         success: function (res) {
+                            if (res.success) {
+                                $("#" + modalId).modal("hide");
+                                $('#viewData').DataTable().destroy();
+                                $('#viewData').empty();
+                                initialDataTable();
+                                toastr.success(res.message);
+                            }
+                            else {
+                                toastr.error(res.message);
+                            }
+                        }
+                    }
+                )
+            }
+            return false;// make form doesn't post back. Force submit form by ajax post
+        }
+
+        function GetAjax(url, data) {
+            var result;
+            $.ajax({
+                url: url,
+                type: "Get",
+                async: false,
+                datatype: "json",
+                data: JSON.parse(data),
+                success: function (res) {
+                    result = res;
+                }
+            })
+            return result;
+        }
+
+        function getFieldByLookupTable(ctr) {
+            $this = $("#" + ctr);
+            $this.empty();
+            var fieldList = GetAjax("@Url.Action("_ActionField", "Partial")",'{"libraryGuid": "@ViewData["libGuid"]"}').result;
+            $this.append($('<option/>', {
+                value: 0,
+                text: "Select a Link Field"
+            }));
+            $.each(fieldList, function (index, itemData) {
+                $this.append($('<option/>', {
+                    value: itemData.guid,
+                    text: itemData.title
+                }));
+            });
+        }
+
+        function editColumn(ctr) {
+            var $colClass = $(ctr).closest("th").attr("class").split(' ');
+            var fieldGuid;
+                $.each($colClass, function (key, value) {
+                    if (value.indexOf("dt_id_") > -1) {
+                        fieldGuid = value.replace("dt_id_","");
+                        return false;
+                    }
+            });
+            showFieldModal('@Url.Action("_FieldAction","Partial")', fieldGuid,'mFieldAction', 'formField','@ViewData["libGuid"]');
+        }
+
+        var fieldGuid;
+        function showDeleteField(ctr) {
+            var $colClass = $(ctr).closest("th").attr("class").split(' ');
+            $.each($colClass, function (key, value) {
+                if (value.indexOf("dt_id_") > -1) {
+                    fieldGuid = value.replace("dt_id_", "");
+                    return false;
+                }
+            });
+            $("#modelDeleteFieldConfirm").modal("show");
+        }
+
+        function doDeleteField(ctr) {
+            $.getJSON('@Url.Action("DeleteLibraryField","Partial")',
+                { guid: fieldGuid, libraryGuid : '@ViewData["libGuid"]' }
+                , function (res) {
+                if (res.success) {
+                    $("#modelDeleteFieldConfirm").modal("hide");
+                    $('#viewData').DataTable().destroy();
+                    $('#viewData').empty();
+                    initialDataTable();
+                    toastr.success(res.message);
+                }
+                else {
+                    toastr.error(res.message);
+                }
+                });
+        }
+
+        function showLinkLibraryModal(ctr) {
+            var $colClass = $(ctr).closest("th").attr("class").split(' ');
+            $.each($colClass, function (key, value) {
+                if (value.indexOf("dt_id_") > -1) {
+                    fieldGuid = value.replace("dt_id_", "");
+                    return false;
+                }
+            });
+
+            $.get('@Url.Action("_LinkToLibrary","Partial")', { fieldGuid: fieldGuid, libraryGuid: "@ViewData["libGuid"]" }, function (res) {
+                console.log(res);
+                $("#divLinkBody").html(res);
+            });
+            $("#modelLinkLibrary").modal("show");
+        }
+
+        function AddLinkToLibrary() {
+            var currentField = $("#SetField").val();
+            var linkLibrary = $("#LinkToLibrary").val();
+            var dependentField = $("#DependentFields").val();
+            var linkLibraryName = $("#LinkToLibrary option:selected").text().split("/").pop();
+
+
+                $.getJSON("@Url.Action("InsertLinkLibrary","View")", {
+                    field: currentField,
+                    linkLibrary: linkLibrary,
+                    dependentField: dependentField,
+                    linkLibraryName: linkLibraryName
+                }, function (res) {
+                if (res.status) {
+                    $('#viewData').DataTable().destroy();
+                    $('#viewData').empty();
+                    initialDataTable();
+                    toastr.success(res.message);
+                }
+                else {
+                    toastr.error(res.message);
+                }
+            });
+            return false;
+        }
+
+
+        function getFieldByLookupTable(ctr) {
+            $ctr = $(ctr);
+            console.log($ctr.val());
+            $.getJSON("@Url.Action("GetFieldsByLibrary","View")", { libraryGuid: $ctr.val() }, function (res) {
+                if (res.status) {
+                    $("#DependentFields").empty();
+                    $.each(res.result, function (key, object) {
+                        var $option;
+                        
+                        //$.each(object, function (id, value) {
+                            $option = $("<option/>", {
+                                value: $(object)[0].guid,
+                                text:$(object)[0].title
+                           });
+                        //});
+                       // console.log(value);
+                       
+                        $("#DependentFields").append($option);
+                    });
+                }
+                else {
+                    toastr.error("Failed to load Fields for Library");
+                }
+              
+            });
+        }
+
+    </script>
+
+}
