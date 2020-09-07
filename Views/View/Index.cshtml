@@ -103,7 +103,7 @@
             initialDataTable();
 
             $("#viewData").find(' thead tr:eq(0)').remove();
-           
+
 
 
            // $(".buttons-edit").removeClass("dt-button buttons-selected buttons-edit").addClass("btn btn-sm btn-success").html("<i class=\"fa fa-pencil\"></i><span> Edit </span>");
@@ -114,6 +114,8 @@
         function initialDataTable() {
             var changetext;
             var selectedTD;
+            var cellNewValue;
+            var selectedCellTD;
 
             $('#viewData thead tr').empty();
               editor = new $.fn.dataTable.Editor({
@@ -131,12 +133,15 @@
                             }
                         }
                     },
-                    edit: {
+                      edit: {
                         type: 'POST',
-                        url: editCellUrl,
+                              url: editCellUrl,
+                              data: function(data) {
+                                  console.log(data)
+                              },
                         success: function (res) {
                             if (res.status) {
-                                $('#viewData').DataTable().ajax.reload();
+                               $('#viewData').DataTable().ajax.reload();
                                 toastr.success(res.result);
                             }
                             else {
@@ -156,6 +161,21 @@
                 idSrc: 'id',
                 table: "#viewData",
                 fields: GetAjax('@Url.Action("DataTableColEditor", "View")', '{"guid": "@ViewData["libGuid"]"}').result
+              });
+
+            editor.on('open', function (e, type) {
+               // console.log($(".form-control").last().parents('td').last())
+                $(".form-control").last().parents('td').last().addClass("selectEditedCell");
+               // $(".form-control").last().val($(".form-control").last().parents('td').text());
+                $(".form-control").last().on("change", function () {
+                    cellNewValue = $(".form-control").last().val();
+                });
+            });
+            editor.on('closed', function (e, node, data, items, type) {
+                console.log($(".selectEditedCell"));
+                console.log(cellNewValue);
+                $(".selectEditedCell").removeClass("selectEditedCell").html(cellNewValue);
+               // $(".selectEditedCell").removeClass("selectEditedCell").html(cellNewValue);
             });
 
             viewTable = $('#viewData').DataTable({
@@ -170,6 +190,10 @@
                 keys: {
                     columns: ':not(:first-child)',
                     editor: editor
+                },
+                order: [[9, 'asc']],
+                rowGroup: {
+                    dataSrc: "year"
                 },
                 select: {
                     style: 'os',
@@ -205,13 +229,13 @@
                  },
                  "drawCallback": function () {
                      $("#viewData tr th:first").removeClass("sorting_asc");
-                   
+
                      // $("th[class^='dt_id_']").addClass("contextMenu");
 
                 },
                 "rowCallback": function (row, data, index) {
-                 
-                    
+
+
                 },
                 "initComplete": function (settings, json) {
                     appendDeleteButton();
@@ -235,6 +259,8 @@
             });
         });
 
+
+
         function appendDeleteButton() {
             var colButtun = "<div class=\"btn-group position-relative\" style=\"float:right\">";
             colButtun += "<a href=\"#\" class= \"btn btn-outline-primary btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\"><i class=\"fa fa-sm fa-edit\"></i></a><div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
@@ -244,7 +270,7 @@
             $("th[class*='dt_id_']").append(colButtun);
         }
 
-    
+
         function currencyFormat(num) {
             if (isNumeric(num)) {
                 var p = parseFloat(num).toFixed(2).split(".");
@@ -437,7 +463,7 @@
                     $("#DependentFields").empty();
                     $.each(res.result, function (key, object) {
                         var $option;
-                        
+
                         //$.each(object, function (id, value) {
                             $option = $("<option/>", {
                                 value: $(object)[0].guid,
@@ -445,14 +471,14 @@
                            });
                         //});
                        // console.log(value);
-                       
+
                         $("#DependentFields").append($option);
                     });
                 }
                 else {
                     toastr.error("Failed to load Fields for Library");
                 }
-              
+
             });
         }
 
