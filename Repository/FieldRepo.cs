@@ -105,7 +105,14 @@ namespace DynamicData.Repository
 
         public async Task<List<Field>> FieldCollection(Guid libraryGuid)
         {
-            return await _context.Field.Include(i => i.FieldType).Where(w => w.LibraryGuid == libraryGuid && w.Visible == 1).ToListAsync();
+            try
+            {
+                return await _context.Field.Include(i => i.FieldType).Where(w => w.LibraryGuid == libraryGuid && w.Visible == 1).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         public async Task<Field> FindByNameAndLibraryGuid(string name, Guid libraryGuid)
@@ -131,5 +138,6 @@ namespace DynamicData.Repository
 
             return field;
         }
+
     }
 }

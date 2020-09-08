@@ -202,9 +202,9 @@ namespace DynamicData.Controllers
                 value = "",
                 label = "--Select--"
             });
-            if (!string.IsNullOrEmpty(field.LookupTable)) // if there is a lookup table take it first
+            if (field.LookupTable != null) // if there is a lookup table take it first
             {
-                var dependentField = await _iField.Find(Guid.Parse(field.LookUpId));
+                var dependentField = await _iField.Find((Guid)field.LookUpId);
                 var dependentValue = await _iFieldValue.FindByFieldID(dependentField.ID);
                 foreach (var item in dependentValue)
                 {
@@ -432,18 +432,66 @@ namespace DynamicData.Controllers
             try
             {
                 var currentField = await _iField.Find(field);
-                currentField.LookupTable = linkLibrary.ToString();
-                currentField.LookUpId = dependentField.ToString();
-                await _iField.Update(currentField);
-                status = true;
-                message = currentField.Title + " Has been linked to Library" + linkLibraryName;
-                return new JsonResult(new { status = status, message = message });
+                if (currentField != null)
+                {
+                    if (linkLibrary != Guid.Empty)
+                    {
+                        currentField.LookupTable = linkLibrary;
+                        currentField.LookUpId = dependentField;
+                        await _iField.Update(currentField);
+                        status = true;
+                        message = currentField.Title + " Has been linked to Library " + linkLibraryName;
+                    }
+                    else
+                    {
+                        message = "Link Library cannot be empty";
+                        status = false;
+                    }
+                }
+                else
+                {
+                    status = false;
+                    message = "Error adding link librrary";
+                }
             }
             catch (Exception ex)
             {
                 status = false;
-                return new JsonResult(new { status = status, message = ex.Message });
+                message = ex.Message;
             }
+            return new JsonResult(new
+            {
+                status = status,
+                message = message
+            });
+
+        }
+
+
+        [HttpGet]
+
+        public async Task<IActionResult> DeleteLinkLibrary(Guid fieldGuid)
+        {
+            bool status = false;
+            string message = "";
+            try
+            {
+                var currentField = await _iField.Find(fieldGuid);
+                if (currentField != null)
+                {
+                    currentField.LookupTable = null;
+                    currentField.LookUpId = null;
+                    await _iField.Update(currentField);
+                    status = true;
+                    message = "Link Library has been removed";
+                }
+            }
+            catch (Exception ex)
+            {
+                status = false;
+                message = ex.Message;
+            }
+            return new JsonResult(new { status = status, message = message });
         }
 
         [HttpGet]

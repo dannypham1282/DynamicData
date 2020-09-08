@@ -23,5 +23,8 @@ namespace DynamicData.Models
         [NotMapped]
         [DisplayName("Dependent Field")]
         public List<Field> DependentFields { get; set; }
+
+        [NotMapped]
+        public Guid LibraryGuid { get; set; }
     }
 }

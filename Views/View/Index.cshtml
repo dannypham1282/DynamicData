@@ -101,15 +101,11 @@
             $.fn.dataTable.moment('MM/DD/YYYY');
             $.fn.dataTable.moment('D-MMM-YY');
             initialDataTable();
-
             $("#viewData").find(' thead tr:eq(0)').remove();
-
-
-
            // $(".buttons-edit").removeClass("dt-button buttons-selected buttons-edit").addClass("btn btn-sm btn-success").html("<i class=\"fa fa-pencil\"></i><span> Edit </span>");
            // $(".buttons-remove").removeClass("dt-button buttons-selected buttons-remove ").addClass("btn btn-sm btn-danger").html("<i class=\"fa fa-trash\"></i><span> Delete </span>");
-
         });
+
         var noeditCol;
         function initialDataTable() {
             var changetext;
@@ -164,9 +160,7 @@
               });
 
             editor.on('open', function (e, type) {
-               // console.log($(".form-control").last().parents('td').last())
                 $(".form-control").last().parents('td').last().addClass("selectEditedCell");
-               // $(".form-control").last().val($(".form-control").last().parents('td').text());
                 $(".form-control").last().on("change", function () {
                     cellNewValue = $(".form-control").last().val();
                 });
@@ -175,7 +169,6 @@
                 console.log($(".selectEditedCell"));
                 console.log(cellNewValue);
                 $(".selectEditedCell").removeClass("selectEditedCell").html(cellNewValue);
-               // $(".selectEditedCell").removeClass("selectEditedCell").html(cellNewValue);
             });
 
             viewTable = $('#viewData').DataTable({
@@ -191,9 +184,9 @@
                     columns: ':not(:first-child)',
                     editor: editor
                 },
-                order: [[9, 'asc']],
+              // order: [[9, 'asc']],
                 rowGroup: {
-                    dataSrc: "year"
+                    dataSrc: ""
                 },
                 select: {
                     style: 'os',
@@ -244,7 +237,11 @@
             });
 
             viewTable.on('column-reorder', function (e, settings, details) {
-                $('#viewData').DataTable().ajax.reload();
+                var headerCell = $(viewTable.column(details).header());
+                console.log(details);
+                //var headerCell = $("#viewData thead tr th");
+                console.log(headerCell)
+               // $('#viewData').DataTable().ajax.reload();
             });
 
             $(".buttons-create").removeClass("dt-button buttons-create").addClass("btn  btn-outline-primary").html("<i class=\"fa fa-plus\"></i> <span> New Record</span>");
@@ -445,6 +442,7 @@
                     $('#viewData').DataTable().destroy();
                     $('#viewData').empty();
                     initialDataTable();
+                    $('#linkLibrary').DataTable().ajax.reload();
                     toastr.success(res.message);
                 }
                 else {
@@ -480,6 +478,20 @@
                 }
 
             });
+        }
+
+        function removeLinkLibrary(fieldGuid) {
+            if (confirm("Are you sure you want to delete this Link Library?")) {
+                $.getJSON('@Url.Action("DeleteLinkLibrary","View")', { fieldGuid: fieldGuid }, function (res) {
+                    if (res.status) {
+                        toastr.success(res.message);
+                        $('#linkLibrary').DataTable().ajax.reload();
+                    }
+                    else {
+                        toastr.error(res.message);
+                    }
+                });
+            }
         }
 
     </script>

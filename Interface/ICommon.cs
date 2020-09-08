@@ -10,5 +10,7 @@ namespace DynamicData.Interface
 
         public string BreadCrumbs(Guid Guid);
         public List<Library> LibraryHierarchy();
+
+        public string GetParentsString(List<Library> Libraries, Library current);
     }
 }

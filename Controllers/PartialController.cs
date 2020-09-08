@@ -190,7 +190,24 @@ namespace DynamicData.Controllers
             linkLibrary.Fields = fieldCollection;
             linkLibrary.LinkToLibrary = _iCommon.LibraryHierarchy();
             linkLibrary.DependentFields = DependentFields;
+            linkLibrary.LibraryGuid = (Guid)libraryGuid;
             return View(linkLibrary);
         }
+
+        [HttpGet]
+        [Route("Partial/LoadLinkLibrary")]
+        public async Task<IActionResult> LoadLinkLibrary(Guid libraryGuid)
+        {
+            try
+            {
+                var linkLibraries = _iCommon.SPReader("spLoadLinkLibraries '" + libraryGuid + "'");
+                return new JsonResult(new { data = linkLibraries });
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
     }
 }

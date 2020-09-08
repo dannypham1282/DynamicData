@@ -92,6 +92,9 @@ namespace DynamicData.Migrations
                     b.Property<Guid>("GUID")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("Grouping")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ItemID")
                         .HasColumnType("int");
 
@@ -101,20 +104,23 @@ namespace DynamicData.Migrations
                     b.Property<int?>("LibraryID")
                         .HasColumnType("int");
 
-                    b.Property<string>("LookUpId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("LookUpId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LookUpValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LookupTable")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("LookupTable")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
 
                     b.Property<int?>("Required")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SortOrder")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")

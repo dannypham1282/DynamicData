@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DynamicData.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200819035704_dbcontextmigrate")]
-    partial class dbcontextmigrate
+    [Migration("20200908060908_db")]
+    partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -43,6 +43,29 @@ namespace DynamicData.Migrations
                     b.ToTable("Authorization");
                 });
 
+            modelBuilder.Entity("DynamicData.Models.DefaultField", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("FieldTypeID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("FieldTypeID");
+
+                    b.ToTable("DefaultField");
+                });
+
             modelBuilder.Entity("DynamicData.Models.Field", b =>
                 {
                     b.Property<int>("ID")
@@ -53,13 +76,16 @@ namespace DynamicData.Migrations
                     b.Property<int?>("ActionButonOpenLibraryID")
                         .HasColumnType("int");
 
-                    b.Property<int>("Deleted")
+                    b.Property<int?>("Deleted")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasColumnType("varchar(MAX)");
 
-                    b.Property<int>("Editable")
+                    b.Property<string>("DropdownValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Editable")
                         .HasColumnType("int");
 
                     b.Property<int?>("FieldTypeID")
@@ -68,29 +94,41 @@ namespace DynamicData.Migrations
                     b.Property<Guid>("GUID")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("Grouping")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ItemID")
                         .HasColumnType("int");
+
+                    b.Property<Guid>("LibraryGuid")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("LibraryID")
                         .HasColumnType("int");
 
-                    b.Property<string>("LookUpId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("LookUpId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LookUpValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LookupTable")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("LookupTable")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
 
+                    b.Property<int?>("Required")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SortOrder")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Visible")
+                    b.Property<int?>("Visible")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
@@ -281,10 +319,10 @@ namespace DynamicData.Migrations
                     b.Property<int?>("CreatedByID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Deleted")
+                    b.Property<int?>("Deleted")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
@@ -293,7 +331,7 @@ namespace DynamicData.Migrations
                     b.Property<int?>("EditedByID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("EditedDate")
+                    b.Property<DateTime?>("EditedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("GUID")
@@ -318,6 +356,9 @@ namespace DynamicData.Migrations
                     b.Property<int?>("ParentID")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SortOrder")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(1000)")
                         .HasMaxLength(1000);
@@ -325,7 +366,7 @@ namespace DynamicData.Migrations
                     b.Property<string>("URL")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Visible")
+                    b.Property<int?>("Visible")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
@@ -335,8 +376,6 @@ namespace DynamicData.Migrations
                     b.HasIndex("EditedByID");
 
                     b.HasIndex("LibraryTypeID");
-
-                    b.HasIndex("ParentID");
 
                     b.ToTable("Library");
                 });
@@ -379,12 +418,27 @@ namespace DynamicData.Migrations
                     b.Property<string>("Controller")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
                     b.ToTable("LibraryType");
+                });
+
+            modelBuilder.Entity("DynamicData.Models.LinkLibrary", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.HasKey("ID");
+
+                    b.ToTable("LinkLibrary");
                 });
 
             modelBuilder.Entity("DynamicData.Models.Permission", b =>
@@ -517,6 +571,13 @@ namespace DynamicData.Migrations
                         .HasForeignKey("SecurityGroupID");
                 });
 
+            modelBuilder.Entity("DynamicData.Models.DefaultField", b =>
+                {
+                    b.HasOne("DynamicData.Models.FieldType", "FieldType")
+                        .WithMany()
+                        .HasForeignKey("FieldTypeID");
+                });
+
             modelBuilder.Entity("DynamicData.Models.Field", b =>
                 {
                     b.HasOne("DynamicData.Models.Library", "ActionButonOpenLibrary")
@@ -527,7 +588,7 @@ namespace DynamicData.Migrations
                         .WithMany()
                         .HasForeignKey("FieldTypeID");
 
-                    b.HasOne("DynamicData.Models.Item", "Item")
+                    b.HasOne("DynamicData.Models.Item", null)
                         .WithMany("Fields")
                         .HasForeignKey("ItemID");
 
@@ -597,10 +658,6 @@ namespace DynamicData.Migrations
                     b.HasOne("DynamicData.Models.LibraryType", "LibraryType")
                         .WithMany()
                         .HasForeignKey("LibraryTypeID");
-
-                    b.HasOne("DynamicData.Models.Library", "Parent")
-                        .WithMany()
-                        .HasForeignKey("ParentID");
                 });
 
             modelBuilder.Entity("DynamicData.Models.LibraryLog", b =>

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DynamicData.Migrations
 {
-    public partial class dbcon : Migration
+    public partial class db : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -296,13 +296,15 @@ namespace DynamicData.Migrations
                     LibraryGuid = table.Column<Guid>(nullable: false),
                     LibraryID = table.Column<int>(nullable: true),
                     FieldTypeID = table.Column<int>(nullable: true),
-                    LookupTable = table.Column<string>(nullable: true),
-                    LookUpId = table.Column<string>(nullable: true),
+                    LookupTable = table.Column<Guid>(nullable: true),
+                    LookUpId = table.Column<Guid>(nullable: true),
                     LookUpValue = table.Column<string>(nullable: true),
                     DropdownValue = table.Column<string>(nullable: true),
                     ActionButonOpenLibraryID = table.Column<int>(nullable: true),
                     Deleted = table.Column<int>(nullable: true),
                     Required = table.Column<int>(nullable: true),
+                    Grouping = table.Column<int>(nullable: true),
+                    SortOrder = table.Column<int>(nullable: true),
                     ItemID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>

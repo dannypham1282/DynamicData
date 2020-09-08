@@ -42,5 +42,16 @@
 
 </div>
 <script>
-    $('#linkLibrary').DataTable();
+
+    $('#linkLibrary').DataTable({
+        ajax: '@Url.Action("LoadLinkLibrary", "Partial")?libraryGuid=@Model.LibraryGuid',
+        columns: [
+            {
+                "data": "id", render: function (data, type, row, meta) {
+                    return "<button class=\"btn btn-xs btn-danger btn_removerow\" onclick=\"removeLinkLibrary('" + data + "')\"><i class=\"fa  fa-trash\"></i></button>";
+                } },
+            { "data": "name" },
+            { "data": "linktable" },
+            { "data": "lookupfield" }]
+    });
 </script>

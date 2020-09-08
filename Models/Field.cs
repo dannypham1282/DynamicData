@@ -53,14 +53,15 @@ namespace DynamicData.Models
         public List<FieldType> FieldTypeCollection { get; set; }
 
         [DisplayName("Link to Library")]
-        public string LookupTable { get; set; }
+        [AllowNull]
+        public Guid? LookupTable { get; set; }
 
         [NotMapped]
         [AllowNull]
         public List<Library> LibraryCollection { get; set; }
 
         [AllowNull]
-        public string LookUpId { get; set; }
+        public Guid? LookUpId { get; set; }
         [AllowNull]
 
         [DisplayName("Link Library Field Name")]
@@ -94,6 +95,10 @@ namespace DynamicData.Models
         [DisplayName("Required")]
         [NotMapped]
         public bool IsRequired { get; set; }
+        [NotMapped]
+        public bool IsGrouping { get; set; }
+        public int? Grouping { get; set; }
+        public int? SortOrder { get; set; }
         public Field()
         {
             this.GUID = System.Guid.NewGuid();

@@ -72,7 +72,7 @@ namespace DynamicData.Repository
             return Hierarchy;
         }
 
-        static string GetParentsString(List<Library> Libraries, Library current)
+        public string GetParentsString(List<Library> Libraries, Library current)
         {
             string path = "";
             Action<List<Library>, Library> GetPath = null;
