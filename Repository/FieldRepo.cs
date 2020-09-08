@@ -91,7 +91,7 @@ namespace DynamicData.Repository
 
         public Task<List<Field>> FieldCollection()
         {
-            return _context.Field.Include(i => i.FieldType).ToListAsync();
+            return _context.Field.Include(i => i.FieldType).OrderBy(o => o.SortOrder).ToListAsync();
         }
 
         public async Task<Field> Update(Field field)
@@ -100,14 +100,22 @@ namespace DynamicData.Repository
             field.Library = library;
             _context.Field.Update(field);
             await _context.SaveChangesAsync();
-            return field;
+            return null;
+        }
+
+
+        public async Task<bool> UpdateSortOrder(Field field)
+        {
+            _context.Field.Update(field);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<List<Field>> FieldCollection(Guid libraryGuid)
         {
             try
             {
-                return await _context.Field.Include(i => i.FieldType).Where(w => w.LibraryGuid == libraryGuid && w.Visible == 1).ToListAsync();
+                return await _context.Field.Include(i => i.FieldType).Where(w => w.LibraryGuid == libraryGuid && w.Visible == 1).OrderBy(o => o.SortOrder).ToListAsync();
             }
             catch (Exception ex)
             {
@@ -119,6 +127,12 @@ namespace DynamicData.Repository
         {
             return await _context.Field.Include(i => i.FieldType).Where(w => w.Name.ToLower() == name.Trim().ToLower() && w.LibraryGuid == libraryGuid).AsNoTracking().FirstOrDefaultAsync();
         }
+
+        public async Task<Field> FindByNameAndLibraryGuidWithoutType(string name, Guid libraryGuid)
+        {
+            return await _context.Field.Where(w => w.Name.ToLower() == name.Trim().ToLower() && w.LibraryGuid == libraryGuid).AsNoTracking().FirstOrDefaultAsync();
+        }
+
 
         public async Task<List<Field>> FieldCollectionForDatatable(Guid libraryGuid)
         {

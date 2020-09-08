@@ -305,6 +305,8 @@ namespace DynamicData.Migrations
                     Required = table.Column<int>(nullable: true),
                     Grouping = table.Column<int>(nullable: true),
                     SortOrder = table.Column<int>(nullable: true),
+                    DefaultSort = table.Column<int>(nullable: true),
+                    SortDirection = table.Column<string>(nullable: true),
                     ItemID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>

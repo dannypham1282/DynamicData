@@ -96,7 +96,9 @@
         var viewTable;
         var editCellUrl = "@Url.Action("UpdateCell", "View")/@ViewData["libGuid"]";
        // getDataTableColumns();
-
+        var rowGroup;
+        var defaultSort;
+        var sortDirection;
         $(document).ready(function () {
             $.fn.dataTable.moment('MM/DD/YYYY');
             $.fn.dataTable.moment('D-MMM-YY');
@@ -184,9 +186,25 @@
                     columns: ':not(:first-child)',
                     editor: editor
                 },
-              // order: [[9, 'asc']],
+                order: [[defaultSort, sortDirection]],
+               // orderFixed: [[defaultSort, 'desc']],
                 rowGroup: {
-                    dataSrc: ""
+                    dataSrc: rowGroup,
+                    endRender: function (rows, group) {
+                        $("#viewData thead tr th.classCurrency").each(function () {
+                            console.log($(this));
+                            });
+
+                        var avg = rows
+                            .data()
+                            .pluck('amount')
+                            .reduce(function (a, b) {
+                                return a + b.replace(/[^\d]/g, '') * 1;
+                            }, 0) ;
+
+                        return 'Average salary in ' + group + ': ' +
+                            $.fn.dataTable.render.number(',', '.', 0, '$').display(avg);
+                    }
                 },
                 select: {
                     style: 'os',
@@ -210,7 +228,11 @@
                      }
                     if (currencyIndex > -1) {
                         $(row).find("td.classCurrency").each(function () {
-                            $(this).html(currencyFormat($(this).html()));
+                            if ($(this).html().indexOf("-") > -1)
+                                $(this).css("color", "red");
+                            else
+                                $(this).css("color", "#007bff");
+                            $(this).html(accounting.formatMoney($(this).html()));
                         });
 
                     }
@@ -237,12 +259,41 @@
             });
 
             viewTable.on('column-reorder', function (e, settings, details) {
-                var headerCell = $(viewTable.column(details).header());
                 console.log(details);
-                //var headerCell = $("#viewData thead tr th");
-                console.log(headerCell)
+                var colArray = [];
+                $("#viewData thead tr th").each(function () {
+                    var rawHtml = $(this).html();
+                    var colName = rawHtml.substring(0, rawHtml.indexOf("<div"));
+                    if (colName != "")
+                        colArray.push(colName);
+                });
+
+                console.log(colArray)
+                $.ajax({
+                    url: '@Url.Action("ReorderDataTableCol","View")',
+                    type: "Get",
+                    async: true,
+                    datatype: "json",
+                    traditional: true,
+                    data: {"libraryGuid":" @ViewData["libGuid"]", "fieldList": colArray },
+                    success: function (res) {
+                        //if (res.status)
+                        //    toastr.success(res.message);
+                    }
+                })
+
                // $('#viewData').DataTable().ajax.reload();
             });
+
+            if (rowGroup == "") {
+                viewTable.rowGroup().disable().draw();
+            }
+            else {
+                viewTable.order.fixed({
+                    pre: [defaultSort, sortDirection]
+                });
+            }
+
 
             $(".buttons-create").removeClass("dt-button buttons-create").addClass("btn  btn-outline-primary").html("<i class=\"fa fa-plus\"></i> <span> New Record</span>");
         }
@@ -259,7 +310,7 @@
 
 
         function appendDeleteButton() {
-            var colButtun = "<div class=\"btn-group position-relative\" style=\"float:right\">";
+            var colButtun = "<div class=\"btn-group position-relative headeractionbutton\" style=\"float:right\">";
             colButtun += "<a href=\"#\" class= \"btn btn-outline-primary btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\"><i class=\"fa fa-sm fa-edit\"></i></a><div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
             colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"editColumn(this)\"><i class=\"fa fa-edit\"></i> Edit Column</a>";
             colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showDeleteField(this)\"><i class=\"fa fa-trash\"></i>  Delete Column</a> <div class=\"dropdown-divider\"></div><a class=\"dropdown-item\" href=\"#\" onclick=\"showLinkLibraryModal(this)\"><i class=\"fa fa-link\"></i> Link Other Library</a>";
@@ -299,7 +350,12 @@
         }
 
         function getDataTableColumns() {
-            var cols = GetAjax('@Url.Action("DataTableColumnDef", "View")', '{"guid": "@ViewData["libGuid"]"}').result;
+            var response = GetAjax('@Url.Action("DataTableColumnDef", "View")', '{"guid": "@ViewData["libGuid"]"}');
+            rowGroup = response.rowGroup;
+            defaultSort = response.defaultSort;
+            sortDirection = response.sortDirection;
+            var cols = response.result;
+
             return cols;
         }
 

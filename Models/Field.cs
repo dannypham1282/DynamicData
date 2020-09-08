@@ -40,11 +40,11 @@ namespace DynamicData.Models
         [AllowNull]
         public Library Library { get; set; }
 
-
+        [DisplayName("Field Type")]
         public int? FieldTypeID { get; set; }
 
         [AllowNull]
-        [DisplayName("Field Type")]
+
         [ForeignKey("FieldTypeID")]
         public FieldType FieldType { get; set; }
 
@@ -96,9 +96,19 @@ namespace DynamicData.Models
         [NotMapped]
         public bool IsRequired { get; set; }
         [NotMapped]
+
+        [DisplayName("Grouping")]
         public bool IsGrouping { get; set; }
         public int? Grouping { get; set; }
         public int? SortOrder { get; set; }
+
+        [DisplayName("Default Sort")]
+        [NotMapped]
+        public bool IsDefaultSort { get; set; }
+        public int? DefaultSort { get; set; }
+
+        [DisplayName("Sort Direction")]
+        public string SortDirection { get; set; }
         public Field()
         {
             this.GUID = System.Guid.NewGuid();

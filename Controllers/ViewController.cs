@@ -90,6 +90,9 @@ namespace DynamicData.Controllers
         public async Task<IActionResult> DataTableColumnDef(string guid)
         {
             List<DataTableColumns> dataTableCol = new List<DataTableColumns>();
+            string rowGroup = "";
+            string sortDirection = "";
+            int defaultSort = 0;
             if (guid != "")
             {
                 Guid libGuid = Guid.Parse(guid);
@@ -110,8 +113,17 @@ namespace DynamicData.Controllers
                 dtCol.orderable = false;
                 dataTableCol.Add(dtCol);
 
+                int fieldCount = 0;
                 foreach (Field field in fields)
                 {
+                    if (field.Grouping == 1)
+                        rowGroup = field.Name.ToLower();
+                    if (field.DefaultSort == 1)
+                    {
+                        defaultSort = fieldCount;
+                        sortDirection = field.SortDirection;
+                    }
+
                     dtCol = new DataTableColumns();
                     dtCol.data = field.Name.ToLower();
                     dtCol.title = field.Title;
@@ -135,11 +147,15 @@ namespace DynamicData.Controllers
                     dtCol.className += "dt_id_" + field.GUID + " ";
                     dtCol.className += (field.Editable == 1) ? "editable" : "noedit";
                     dataTableCol.Add(dtCol);
+                    fieldCount++;
                 }
             }
             return new JsonResult(new
             {
-                result = dataTableCol
+                result = dataTableCol,
+                rowGroup = rowGroup,
+                defaultSort = defaultSort + 2,
+                sortDirection = sortDirection
             });
         }
 
@@ -384,24 +400,27 @@ namespace DynamicData.Controllers
         {
             DataTableValidateMessage Validation = new DataTableValidateMessage();
             field.Required = (field.Required == null) ? 0 : field.Required;
-            if (field.Editable == 1)
+            if (field.Required == 1)
             {
-                if (field.Required == 1)
+                if (field.Editable == 1)
                 {
-                    if (string.IsNullOrEmpty(newValue))
+                    if (field.Required == 1)
                     {
-                        Validation.Name = field.Name.ToLower();
-                        Validation.Status = field.Title + " is required.";
+                        if (string.IsNullOrEmpty(newValue))
+                        {
+                            Validation.Name = field.Name.ToLower();
+                            Validation.Status = field.Title + " is required.";
+                        }
                     }
-                }
-                if ((field.FieldType.Type.ToString().ToLower() == "currency") || (field.FieldType.Type.ToString().ToLower() == "number") || (field.FieldType.Type.ToString().ToLower() == "percentage"))
-                {
-                    double tempInt = 0;
-                    bool result = double.TryParse(newValue, out tempInt);
-                    if (!result)
+                    if ((field.FieldType.Type.ToString().ToLower() == "currency") || (field.FieldType.Type.ToString().ToLower() == "number") || (field.FieldType.Type.ToString().ToLower() == "percentage"))
                     {
-                        Validation.Name = field.Name.ToLower();
-                        Validation.Status = field.Title + " value " + newValue + " is not a number.";
+                        double tempInt = 0;
+                        bool result = double.TryParse(newValue, out tempInt);
+                        if (!result)
+                        {
+                            Validation.Name = field.Name.ToLower();
+                            Validation.Status = field.Title + " value " + newValue + " is not a number.";
+                        }
                     }
                 }
             }
@@ -495,12 +514,24 @@ namespace DynamicData.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ReorderDataTableCol(Guid libraryGuid, string fieldList)
+        public async Task<IActionResult> ReorderDataTableCol(Guid libraryGuid, string[] fieldList)
         {
             bool status = false;
-            string message = "";
             try
             {
+                string[] unique = fieldList.Distinct().ToArray();
+                status = true;
+                for (int i = 0; i < unique.Length; i++)
+                {
+                    var field = new Field();
+                    if (!string.IsNullOrEmpty(unique[i]))
+                    {
+                        field = await _iField.FindByNameAndLibraryGuidWithoutType(unique[i], libraryGuid);
+                        field.SortOrder = i;
+                        await _iField.UpdateSortOrder(field);
+                    }
+                }
+
                 return new JsonResult(new { status = status, result = "Columns re-order completed" });
             }
             catch (Exception ex)

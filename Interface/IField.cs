@@ -17,12 +17,14 @@ namespace DynamicData.Interface
         public Task<Field> Delete(Guid Guid);
         public Task<bool> Delete(Field field);
         public Task<Field> Update(Field field);
+        public Task<bool> UpdateSortOrder(Field field);
 
         public Task<Field> Find(Guid Guid);
         public Task<Field> FindByGuid(Guid Guid);
         public Task<Field> FindByID(int ID);
 
         public Task<Field> FindByNameAndLibraryGuid(string name, Guid libraryGuid);
+        public Task<Field> FindByNameAndLibraryGuidWithoutType(string name, Guid libraryGuid);
 
         public Task<bool> DeleteByLibrary(Guid Guid);
 

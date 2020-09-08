@@ -45,6 +45,8 @@ namespace DynamicData.Controllers
                     field.IsEditable = (field.Editable == 1) ? true : false;
                     field.IsVisible = (field.Visible == 1) ? true : false;
                     field.IsRequired = (field.Required == 1) ? true : false;
+                    field.IsGrouping = (field.Grouping == 1) ? true : false;
+                    field.IsDefaultSort = (field.DefaultSort == 1) ? true : false;
                     return View(field);
 
                 }
@@ -53,7 +55,9 @@ namespace DynamicData.Controllers
                     Field field = await _iField.EmptyFieldForView();
                     field.IsEditable = true;
                     field.IsVisible = true;
-                    field.IsRequired = true;
+                    field.IsRequired = false;
+                    field.IsGrouping = false;
+                    field.IsDefaultSort = false;
                     return View(field);
                 }
             }
@@ -87,6 +91,8 @@ namespace DynamicData.Controllers
                             field.Visible = (field.IsVisible) ? 1 : 0;
                             field.Editable = (field.IsEditable) ? 1 : 0;
                             field.Required = (field.IsRequired) ? 1 : 0;
+                            field.Grouping = (field.IsGrouping) ? 1 : 0;
+                            field.DefaultSort = (field.IsDefaultSort) ? 1 : 0;
                             field.Deleted = 0;
                             await _iField.Add(field);
                             status = true;
@@ -98,6 +104,8 @@ namespace DynamicData.Controllers
                             field.Visible = (field.IsVisible) ? 1 : 0;
                             field.Editable = (field.IsEditable) ? 1 : 0;
                             field.Required = (field.IsRequired) ? 1 : 0;
+                            field.Grouping = (field.IsGrouping) ? 1 : 0;
+                            field.DefaultSort = (field.IsDefaultSort) ? 1 : 0;
                             field.Deleted = 0;
                             await _iField.Update(field);
                             status = true;

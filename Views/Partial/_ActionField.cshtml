@@ -42,10 +42,18 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-3">
                         @Html.LabelFor(x => x.FieldTypeID, new { @class = "col-form-label text-sm-right" })
                         @Html.DropDownListFor(model => model.FieldTypeID, new SelectList(Model.FieldTypeCollection, "ID", "Type"), "Select Field Type", new { @class = "form-control", @placeholder = "Field Type", @Required = "required" })
                         <span asp-validation-for="FieldTypeID" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.LabelFor(x => x.SortDirection, new { @class = "col-form-label text-sm-right" })
+                        @Html.DropDownListFor(model => model.SortDirection, new SelectList(new List<SelectListItem>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {
+                                new SelectListItem { Text = "asc", Value = "asc"},
+                                new SelectListItem { Text = "desc", Value = "desc"}}, "Value", "Text"), new { @class = "form-control", @placeholder = "Field Type" })
+                        <span asp-validation-for="SortDirection" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
                     </div>
                     <div class="col-sm-2">
                         <div class="custom-control custom-switch" style="padding-top:50px">
@@ -78,7 +86,22 @@
                         @Html.TextAreaFor(model => model.DropdownValue, new { maxlength = 1000, @class = "form-control", @placeholder = "Description" })
                     </div>
                 </div>
-
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="custom-control custom-switch" style="padding-top:30px">
+                            @Html.EditorFor(model => model.IsGrouping, new { htmlAttributes = new { @class = "custom-control-input" } })
+                            @Html.LabelFor(x => x.IsGrouping, new { @class = "custom-control-label" })
+                            <span asp-validation-for="IsGrouping" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="custom-control custom-switch" style="padding-top:30px">
+                            @Html.EditorFor(model => model.IsDefaultSort, new { htmlAttributes = new { @class = "custom-control-input" } })
+                            @Html.LabelFor(x => x.IsDefaultSort, new { @class = "custom-control-label" })
+                            <span asp-validation-for="IsDefaultSort" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>

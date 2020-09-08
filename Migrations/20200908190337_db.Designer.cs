@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DynamicData.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200908060908_db")]
+    [Migration("20200908190337_db")]
     partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,6 +76,9 @@ namespace DynamicData.Migrations
                     b.Property<int?>("ActionButonOpenLibraryID")
                         .HasColumnType("int");
 
+                    b.Property<int?>("DefaultSort")
+                        .HasColumnType("int");
+
                     b.Property<int?>("Deleted")
                         .HasColumnType("int");
 
@@ -121,6 +124,9 @@ namespace DynamicData.Migrations
 
                     b.Property<int?>("Required")
                         .HasColumnType("int");
+
+                    b.Property<string>("SortDirection")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("SortOrder")
                         .HasColumnType("int");

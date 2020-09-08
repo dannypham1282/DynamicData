@@ -74,6 +74,9 @@ namespace DynamicData.Migrations
                     b.Property<int?>("ActionButonOpenLibraryID")
                         .HasColumnType("int");
 
+                    b.Property<int?>("DefaultSort")
+                        .HasColumnType("int");
+
                     b.Property<int?>("Deleted")
                         .HasColumnType("int");
 
@@ -119,6 +122,9 @@ namespace DynamicData.Migrations
 
                     b.Property<int?>("Required")
                         .HasColumnType("int");
+
+                    b.Property<string>("SortDirection")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("SortOrder")
                         .HasColumnType("int");
