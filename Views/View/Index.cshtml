@@ -198,7 +198,7 @@
                         var headerCount = new Array($("#viewData thead tr th").length).fill("");
 
                         $("#viewData thead tr th.classCurrency").each(function () {
-                            var colName = $(this)[0].outerText.toLowerCase();
+                            var colName = $(this)[0].innerText.toLowerCase();
                             var index = $(this).index();
                             var sum = rows
                             .data()
