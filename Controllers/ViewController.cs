@@ -183,7 +183,7 @@ namespace DynamicData.Controllers
                                 dtCol.type = "datetime";
                                 dtCol.DisplayFormat = "MM/DD/YYYY";
                             }
-                            else if (field.FieldType.Type.ToLower() == "dropdown")
+                            else if ((field.FieldType.Type.ToLower() == "dropdown") || (field.FieldType.Type.ToLower() == "states"))
                             {
                                 dtCol.type = "select";
                                 await ColumnOptionsAsync(dtCol, field);
@@ -218,37 +218,54 @@ namespace DynamicData.Controllers
                 value = "",
                 label = "--Select--"
             });
-            if (field.LookupTable != null) // if there is a lookup table take it first
+
+            if (field.FieldType.Type.ToLower() == "states") // list of United States states
             {
-                var dependentField = await _iField.Find((Guid)field.LookUpId);
-                var dependentValue = await _iFieldValue.FindByFieldID(dependentField.ID);
-                foreach (var item in dependentValue)
+                foreach (var state in _iCommon.ListStates())
                 {
+
                     optionList.Add(new DataTableColumnOption
                     {
-                        value = item.Value.Trim(),
-                        label = item.Value.Trim()
+                        value = state.Values.ToArray()[2].ToString(),
+                        label = state.Values.ToArray()[2].ToString()
                     });
                 }
                 dtCol.options = optionList;
             }
-            else // then check if the manual input for dropdown
+            else
             {
-                if (!string.IsNullOrEmpty(field.DropdownValue))
+                if (field.LookupTable != null) // if there is a lookup table take it first
                 {
-
-                    var dropItems = field.DropdownValue.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (dropItems.Length > 0)
+                    var dependentField = await _iField.Find((Guid)field.LookUpId);
+                    var dependentValue = await _iFieldValue.FindByFieldID(dependentField.ID);
+                    foreach (var item in dependentValue)
                     {
-                        foreach (string dropItem in dropItems)
+                        optionList.Add(new DataTableColumnOption
                         {
-                            optionList.Add(new DataTableColumnOption
+                            value = item.Value.Trim(),
+                            label = item.Value.Trim()
+                        });
+                    }
+                    dtCol.options = optionList;
+                }
+                else // then check if the manual input for dropdown
+                {
+                    if (!string.IsNullOrEmpty(field.DropdownValue))
+                    {
+
+                        var dropItems = field.DropdownValue.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (dropItems.Length > 0)
+                        {
+                            foreach (string dropItem in dropItems)
                             {
-                                value = dropItem.Trim(),
-                                label = dropItem.Trim()
-                            });
+                                optionList.Add(new DataTableColumnOption
+                                {
+                                    value = dropItem.Trim(),
+                                    label = dropItem.Trim()
+                                });
+                            }
+                            dtCol.options = optionList;
                         }
-                        dtCol.options = optionList;
                     }
                 }
             }
@@ -320,7 +337,7 @@ namespace DynamicData.Controllers
                             string[] keys = Common.getUpdateKey(key);
                             int itemID = Convert.ToInt32(keys[0].ToString());
                             var item = await _iItem.FindByID(itemID);
-                            var filedName = keys[1].ToString();
+                            var filedName = keys[1].ToString().Trim();
                             var fieldValue = await _iFieldValue.FindbyNameAndLibraryGuidAndItemID(filedName, libraryGuid, itemID);
                             if (fieldValue == null) //propably new field just added to to the library, no field record has been added yet. Add new field to library record
                             {
@@ -354,6 +371,8 @@ namespace DynamicData.Controllers
                                 else
                                     return new JsonResult(new { status = false, result = validation.Status });
                             }
+                            await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString());
+
                             return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
                         }
                     }

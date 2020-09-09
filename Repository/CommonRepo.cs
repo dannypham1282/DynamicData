@@ -57,6 +57,29 @@ namespace DynamicData.Repository
             return data;
         }
 
+        public bool SPNonQuery(string storeProcedure)
+        {
+            DbConnection conn = _context.Database.GetDbConnection();
+
+            DbCommand cmd = conn.CreateCommand();
+            conn.Open();
+            cmd.CommandText = storeProcedure;
+
+            try
+            {
+                var result = cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            finally
+            {
+                if (conn.State.Equals(ConnectionState.Open)) { conn.Close(); }
+            }
+        }
+
         public List<Models.Library> LibraryHierarchy()
         {
             List<Models.Library> Hierarchy = new List<Models.Library>();
@@ -89,6 +112,11 @@ namespace DynamicData.Repository
             string[] split = path.Split(new char[] { '/' });
             Array.Reverse(split);
             return string.Join("/", split);
+        }
+
+        public List<Dictionary<string, object>> ListStates()
+        {
+            return SPReader("spGetAllStates");
         }
     }
 }

@@ -93,6 +93,7 @@ namespace DynamicData.Controllers
                             field.Required = (field.IsRequired) ? 1 : 0;
                             field.Grouping = (field.IsGrouping) ? 1 : 0;
                             field.DefaultSort = (field.IsDefaultSort) ? 1 : 0;
+                            field.SortOrder = 100;
                             field.Deleted = 0;
                             await _iField.Add(field);
                             status = true;

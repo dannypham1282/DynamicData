@@ -12,10 +12,12 @@ namespace DynamicData.Repository
     public class FieldValueRepo : IFieldValue
     {
         private readonly DatabaseContext _context;
+        private readonly ICommon _iCommon;
 
-        public FieldValueRepo(DatabaseContext dbContext)
+        public FieldValueRepo(DatabaseContext dbContext, ICommon iCommon)
         {
             _context = dbContext;
+            _iCommon = iCommon;
         }
 
         public async Task<FieldValue> Add(FieldValue fieldValue)
@@ -69,8 +71,6 @@ namespace DynamicData.Repository
             return await _context.FieldValue.ToListAsync();
         }
 
-
-
         public async Task<FieldValue> FindByGuid(Guid Guid)
         {
             return await _context.FieldValue.Where(w => w.GUID == Guid).FirstOrDefaultAsync();
@@ -113,5 +113,19 @@ namespace DynamicData.Repository
         {
             return await _context.FieldValue.Where(w => w.FieldID == ID).ToListAsync();
         }
+
+        public async Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue)
+        {
+            try
+            {
+                _iCommon.SPNonQuery("spUpdateValueForRelatedDropdown '" + libraryGuid + "','" + fieldName + "', '" + newValue + "'");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
+
 }

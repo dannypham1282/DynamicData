@@ -2,6 +2,8 @@
 @{ ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml"; }
 
+
+
 <div class="card card-default">
     <div class="card-header card-warning card-outline">
         <h3 class="card-title" id="viewCardTitle">
@@ -15,6 +17,7 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-right" role="menu">
                     <a class="dropdown-item" href="#" onclick="showFieldModal('@Url.Action("_FieldAction","Partial")', 0, 'mFieldAction', 'formField','@ViewData["libGuid"]'); return false;"><i class="fas fa-plus"></i> Add New Field</a>
+                    <a class="dropdown-item" href="#" id="editFieldMode" onclick="setEditFieldMode()"><i class="fas fa-cog"></i> Edit Field Mode</a>
                     <a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Edit Hidden Fields</a>
                     <a class="dropdown-item" href="#"><i class="fas fa-link"></i> Link Libraries</a>
                     <div class="dropdown-divider"></div>
@@ -99,6 +102,7 @@
         var rowGroup;
         var defaultSort;
         var sortDirection;
+        var fieldEditMode =0;
         $(document).ready(function () {
             $.fn.dataTable.moment('MM/DD/YYYY');
             $.fn.dataTable.moment('D-MMM-YY');
@@ -191,19 +195,29 @@
                 rowGroup: {
                     dataSrc: rowGroup,
                     endRender: function (rows, group) {
-                        $("#viewData thead tr th.classCurrency").each(function () {
-                            console.log($(this));
-                            });
+                        var headerCount = new Array($("#viewData thead tr th").length).fill("");
 
-                        var avg = rows
+                        $("#viewData thead tr th.classCurrency").each(function () {
+                            var colName = $(this)[0].outerText.toLowerCase();
+                            var index = $(this).index();
+                            var sum = rows
                             .data()
-                            .pluck('amount')
+                            .pluck($.trim(colName))
                             .reduce(function (a, b) {
                                 return a + b.replace(/[^\d]/g, '') * 1;
-                            }, 0) ;
+                            }, 0);
+                            headerCount[index] = $.fn.dataTable.render.number(',', '.', 0, '$').display(sum);
 
-                        return 'Average salary in ' + group + ': ' +
-                            $.fn.dataTable.render.number(',', '.', 0, '$').display(avg);
+                        });
+
+                        var returnTD = $('<tr/>');
+                        for (i = 0; i < headerCount.length; i++) {
+                            if (headerCount[i]!= "")
+                                returnTD.append('<td class="classCurrencySum" >Total: ' + headerCount[i] + "</td>");
+                            else
+                                returnTD.append("<td></td>");
+                        }
+                        return returnTD;
                     }
                 },
                 select: {
@@ -212,6 +226,59 @@
                     blurable: true
                  },
                 buttons: [
+                    {
+                        extend: "print",
+                        exportOptions: {
+                            columns: ':visible:not(:first-child)',
+                            format: {
+                                header: function (data, columnIdx) {
+                                    if (columnIdx == 1) {
+                                        return 'column_1_header';
+                                    }
+                                    else {
+                                        return data;
+                                    }
+                                }
+                            }
+                            // columns: 'th:not(:last-child)'
+                        }
+                    },
+                    {
+                        extend: "pdf",
+                        exportOptions: {
+                            columns: ':visible:not(:first-child)',
+                            format: {
+                                header: function (data, columnIdx) {
+                                    if (columnIdx == 1) {
+                                        return 'column_1_header';
+                                    }
+                                    else {
+                                        return data;
+                                    }
+                                }
+                            }
+                            // columns: 'th:not(:last-child)'
+                        }
+                    },
+                    ,
+                    {
+                        extend: "excel",
+                        exportOptions: {
+                            columns: ':visible:not(:first-child)',
+                            format: {
+                                header: function (data, columnIdx) {
+                                    if (columnIdx == 1) {
+                                        return 'column_1_header';
+                                    }
+                                    else {
+                                        return data;
+                                    }
+                                }
+                            }
+                            // columns: 'th:not(:last-child)'
+                        }
+                    },
+                   // 'copy', 'csv', 'excel', 'pdf', 'print',
                     { extend: "create", editor: editor },
                   //  { extend: "edit", editor: editor },
                   //  { extend: "remove", editor: editor }
@@ -230,8 +297,6 @@
                         $(row).find("td.classCurrency").each(function () {
                             if ($(this).html().indexOf("-") > -1)
                                 $(this).css("color", "red");
-                            else
-                                $(this).css("color", "#007bff");
                             $(this).html(accounting.formatMoney($(this).html()));
                         });
 
@@ -253,13 +318,12 @@
 
                 },
                 "initComplete": function (settings, json) {
-                    appendDeleteButton();
+                  appendDeleteButton();
                 },
                 ajax: '@Url.Action("LoadData", "View")/@ViewData["libGuid"]'
             });
 
             viewTable.on('column-reorder', function (e, settings, details) {
-                console.log(details);
                 var colArray = [];
                 $("#viewData thead tr th").each(function () {
                     var rawHtml = $(this).html();
@@ -267,8 +331,7 @@
                     if (colName != "")
                         colArray.push(colName);
                 });
-
-                console.log(colArray)
+                $('#viewData').DataTable().ajax.reload();
                 $.ajax({
                     url: '@Url.Action("ReorderDataTableCol","View")',
                     type: "Get",
@@ -277,12 +340,9 @@
                     traditional: true,
                     data: {"libraryGuid":" @ViewData["libGuid"]", "fieldList": colArray },
                     success: function (res) {
-                        //if (res.status)
-                        //    toastr.success(res.message);
+
                     }
                 })
-
-               // $('#viewData').DataTable().ajax.reload();
             });
 
             if (rowGroup == "") {
@@ -296,6 +356,11 @@
 
 
             $(".buttons-create").removeClass("dt-button buttons-create").addClass("btn  btn-outline-primary").html("<i class=\"fa fa-plus\"></i> <span> New Record</span>");
+            $(".buttons-print").removeClass("dt-button buttons-print").addClass("btn  btn-outline-secondary").html("<i class=\"fa fa-print\"></i> <span>Print</span>");
+            $(".buttons-excel").removeClass("dt-button buttons-excel").addClass("btn  btn-outline-success").html("<i class=\"fas fa-file-excel\"></i> <span>Excel</span>");
+            $(".buttons-pdf").removeClass("dt-button buttons-pdf").addClass("btn  btn-outline-danger").html("<i class=\"fas fas fa-file-pdf\"></i> <span>PDF</span>");
+
+
         }
 
         $('#viewData').on('click', '.btn_removerow', function (e) {
@@ -310,12 +375,17 @@
 
 
         function appendDeleteButton() {
-            var colButtun = "<div class=\"btn-group position-relative headeractionbutton\" style=\"float:right\">";
-            colButtun += "<a href=\"#\" class= \"btn btn-outline-primary btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\"><i class=\"fa fa-sm fa-edit\"></i></a><div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
-            colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"editColumn(this)\"><i class=\"fa fa-edit\"></i> Edit Column</a>";
-            colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showDeleteField(this)\"><i class=\"fa fa-trash\"></i>  Delete Column</a> <div class=\"dropdown-divider\"></div><a class=\"dropdown-item\" href=\"#\" onclick=\"showLinkLibraryModal(this)\"><i class=\"fa fa-link\"></i> Link Other Library</a>";
-            colButtun += "</div>";
-            $("th[class*='dt_id_']").append(colButtun);
+            console.log(fieldEditMode)
+            var colButtun = "";
+            if (fieldEditMode == 1) {
+                colButtun = "<div class=\"btn-group position-relative headeractionbutton\" style=\"float:right\">";
+                colButtun += "<a href=\"#\" class= \"btn btn-outline-primary btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\"><i class=\"fa fa-sm fa-edit\"></i></a><div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
+                colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"editColumn(this)\"><i class=\"fa fa-edit\"></i> Edit Column</a>";
+                colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showDeleteField(this)\"><i class=\"fa fa-trash\"></i>  Delete Column</a> <div class=\"dropdown-divider\"></div><a class=\"dropdown-item\" href=\"#\" onclick=\"showLinkLibraryModal(this)\"><i class=\"fa fa-link\"></i> Link Other Library</a>";
+                colButtun += "</div>";
+                $("th[class*='dt_id_']").append(colButtun);
+            }
+
         }
 
 
@@ -548,6 +618,20 @@
                     }
                 });
             }
+        }
+
+        function setEditFieldMode() {
+            if (fieldEditMode == 0) {
+                $("#editFieldMode").empty().html("<i class=\"fas fa-cog\"></i> Cancel Edit Field Mode");
+                fieldEditMode = 1;
+            }
+            else if (fieldEditMode == 1) {
+                $("#editFieldMode").empty().html("<i class=\"fas fa-cog\"></i> Edit Field Mode");
+                fieldEditMode = 0;
+            }
+            $('#viewData').DataTable().destroy();
+            $('#viewData').empty();
+            initialDataTable();
         }
 
     </script>

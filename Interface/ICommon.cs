@@ -12,5 +12,9 @@ namespace DynamicData.Interface
         public List<Library> LibraryHierarchy();
 
         public string GetParentsString(List<Library> Libraries, Library current);
+
+        public bool SPNonQuery(string storeProcedure);
+
+        public List<Dictionary<string, object>> ListStates();
     }
 }
