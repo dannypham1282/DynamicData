@@ -126,6 +126,34 @@ namespace DynamicData.Repository
                 return false;
             }
         }
+
+        public async Task<bool> UpdateValueForDropdownWhenDeleted(Guid libraryGuid, int itemID)
+        {
+            try
+            {
+                _iCommon.SPNonQuery("spUpdateValueForDropdownWhenDeleted '" + libraryGuid + "','" + itemID + "'");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> CheckDuplicateFieldValue(int fieldID, string value)
+        {
+            try
+            {
+                var fieldValue = await _context.FieldValue.Where(w => w.FieldID == fieldID && w.Value.ToLower().Trim() == value.ToLower().Trim()).AsNoTracking().FirstOrDefaultAsync();
+                if (fieldValue != null)
+                    return true;
+                else return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
 
 }

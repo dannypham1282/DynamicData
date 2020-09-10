@@ -380,6 +380,7 @@ namespace DynamicData.Controllers
                 else if (HttpContext.Request.Form["action"].ToString() == "remove")//remove)
                 {
                     string[] keys = Common.getUpdateKey(HttpContext.Request.Form.Keys.ToArray()[0]);
+                    await _iFieldValue.UpdateValueForDropdownWhenDeleted(libraryGuid, Convert.ToInt32(keys[0]));
                     await _iItem.Delete(Convert.ToInt32(keys[0]));
                     return new JsonResult(new { result = "Record has been deleted" });
                 }
@@ -441,6 +442,16 @@ namespace DynamicData.Controllers
                             Validation.Status = field.Title + " value " + newValue + " is not a number.";
                         }
                     }
+                    if (field.CheckDubplicate == 1)
+                    {
+                        var check = Task.Run(() => _iFieldValue.CheckDuplicateFieldValue(field.ID, newValue)).Result;
+                        if (check)
+                        {
+                            Validation.Name = field.Name.ToLower();
+                            Validation.Status = field.Title + " value " + newValue + " already exists.";
+                        }
+                    }
+
                 }
             }
             return Validation;

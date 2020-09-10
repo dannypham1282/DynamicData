@@ -47,6 +47,7 @@ namespace DynamicData.Controllers
                     field.IsRequired = (field.Required == 1) ? true : false;
                     field.IsGrouping = (field.Grouping == 1) ? true : false;
                     field.IsDefaultSort = (field.DefaultSort == 1) ? true : false;
+                    field.IsCheckDuplicate = (field.CheckDubplicate == 1) ? true : false;
                     return View(field);
 
                 }
@@ -58,6 +59,7 @@ namespace DynamicData.Controllers
                     field.IsRequired = false;
                     field.IsGrouping = false;
                     field.IsDefaultSort = false;
+                    field.IsCheckDuplicate = false;
                     return View(field);
                 }
             }
@@ -93,6 +95,7 @@ namespace DynamicData.Controllers
                             field.Required = (field.IsRequired) ? 1 : 0;
                             field.Grouping = (field.IsGrouping) ? 1 : 0;
                             field.DefaultSort = (field.IsDefaultSort) ? 1 : 0;
+                            field.CheckDubplicate = (field.IsCheckDuplicate) ? 1 : 0;
                             field.SortOrder = 100;
                             field.Deleted = 0;
                             await _iField.Add(field);
@@ -107,6 +110,7 @@ namespace DynamicData.Controllers
                             field.Required = (field.IsRequired) ? 1 : 0;
                             field.Grouping = (field.IsGrouping) ? 1 : 0;
                             field.DefaultSort = (field.IsDefaultSort) ? 1 : 0;
+                            field.CheckDubplicate = (field.IsCheckDuplicate) ? 1 : 0;
                             field.Deleted = 0;
                             await _iField.Update(field);
                             status = true;

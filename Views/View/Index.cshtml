@@ -180,6 +180,7 @@
             viewTable = $('#viewData').DataTable({
                 fixedHeader: true,
                 colReorder: true,
+                stateSave: true,
                 "aLengthMenu": [[25, 50, 100, -1], [ 25, 50, 100,200,250,300,350,400, "All"]],
                 "language": {
                     "emptyTable": "No data available in table"
@@ -200,12 +201,21 @@
                         $("#viewData thead tr th.classCurrency").each(function () {
                             var colName = $(this)[0].innerText.toLowerCase();
                             var index = $(this).index();
-                            var sum = rows
-                            .data()
-                            .pluck($.trim(colName))
-                            .reduce(function (a, b) {
-                                return a + b.replace(/[^\d]/g, '') * 1;
-                            }, 0);
+                            console.log(rows.cells(rows.indexes(), index + 1).render())
+                            console.log(rows
+                                .data()
+                                .pluck(colName));
+
+                            var sum = rows.cells(rows.indexes(), index + 1).render()
+                                .reduce(function (a, b) {
+                                    if (typeof a === 'string') {
+                                        a = a.replace(/[^\d.-]/g, '') * 1;
+                                    }
+                                    if (typeof b === 'string') {
+                                        b = b.replace(/[^\d.-]/g, '') * 1;
+                                    }
+                                    return a + b;
+                                },0);
                             headerCount[index] = $.fn.dataTable.render.number(',', '.', 0, '$').display(sum);
 
                         });

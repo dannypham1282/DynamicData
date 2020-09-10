@@ -107,6 +107,11 @@ namespace DynamicData.Models
         public bool IsDefaultSort { get; set; }
         public int? DefaultSort { get; set; }
 
+        [DisplayName("Check Duplicate")]
+        [NotMapped]
+        public bool IsCheckDuplicate { get; set; }
+        public int? CheckDubplicate { get; set; }
+
         [DisplayName("Sort Direction")]
         public string SortDirection { get; set; }
         public Field()
@@ -114,7 +119,5 @@ namespace DynamicData.Models
             this.GUID = System.Guid.NewGuid();
 
         }
-
-
     }
 }
