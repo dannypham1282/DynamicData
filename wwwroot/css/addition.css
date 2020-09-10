@@ -130,4 +130,5 @@ td.classCurrencySum {
 
 .dtrg-group {
     background-color: white !important;
+    /* cursor: no-drop;*/
 }

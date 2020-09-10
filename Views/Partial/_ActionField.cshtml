@@ -54,7 +54,7 @@
                     <div class="col-sm-3">
                         @Html.LabelFor(x => x.SortDirection, new { @class = "col-form-label text-sm-right" })
                         @Html.DropDownListFor(model => model.SortDirection, new SelectList(new List<SelectListItem>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {
                                     new SelectListItem { Text = "asc", Value = "asc"},
                                     new SelectListItem { Text = "desc", Value = "desc"}}, "Value", "Text"), new { @class = "form-control", @placeholder = "Field Type" })
                         <span asp-validation-for="SortDirection" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
@@ -113,6 +113,12 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <hr />
+                    </div>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>

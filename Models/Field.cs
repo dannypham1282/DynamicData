@@ -114,6 +114,9 @@ namespace DynamicData.Models
 
         [DisplayName("Sort Direction")]
         public string SortDirection { get; set; }
+
+        [DisplayName("Value From Other Library")]
+        public string ValueFromOtherLibrary { get; set; }
         public Field()
         {
             this.GUID = System.Guid.NewGuid();

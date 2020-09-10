@@ -139,7 +139,7 @@
                         type: 'POST',
                               url: editCellUrl,
                               data: function(data) {
-                                  console.log(data)
+                                //  console.log(data)
                               },
                         success: function (res) {
                             if (res.status) {
@@ -165,16 +165,20 @@
                 fields: GetAjax('@Url.Action("DataTableColEditor", "View")', '{"guid": "@ViewData["libGuid"]"}').result
               });
 
+            var lastEditControl;
             editor.on('open', function (e, type) {
                 $(".form-control").last().parents('td').last().addClass("selectEditedCell");
+                lastEditControl = $(".form-control").last();
                 $(".form-control").last().on("change", function () {
                     cellNewValue = $(".form-control").last().val();
                 });
             });
             editor.on('closed', function (e, node, data, items, type) {
-                console.log($(".selectEditedCell"));
-                console.log(cellNewValue);
-                $(".selectEditedCell").removeClass("selectEditedCell").html(cellNewValue);
+               // console.log($(".selectEditedCell"));
+              //  console.log(cellNewValue);
+                console.log(lastEditControl);
+              //  editor.field('amount').input().trigger('change');
+              $(".selectEditedCell").removeClass("selectEditedCell").html(cellNewValue);
             });
 
             viewTable = $('#viewData').DataTable({
@@ -382,6 +386,10 @@
             });
         });
 
+        $(document).on('click', '.dtrg-group', function () {
+            // your function here
+            //alert("click me")
+        });
 
 
         function appendDeleteButton() {
