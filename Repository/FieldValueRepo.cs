@@ -111,7 +111,7 @@ namespace DynamicData.Repository
 
         public async Task<List<FieldValue>> FindByFieldID(int ID)
         {
-            return await _context.FieldValue.Where(w => w.FieldID == ID).ToListAsync();
+            return await _context.FieldValue.Where(w => w.FieldID == ID).OrderBy(o => o.Field.Title).ToListAsync();
         }
 
         public async Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue)
