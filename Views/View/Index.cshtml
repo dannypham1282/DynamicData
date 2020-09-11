@@ -216,7 +216,7 @@
                                     }
                                     return a + b;
                                 },0);
-                            headerCount[index] = $.fn.dataTable.render.number(',', '.', 0, '$').display(sum);
+                            headerCount[index] = accounting.formatMoney(sum) //$.fn.dataTable.render.number(',', '.', 0, '$').display(sum);
                         });
 
                         var returnTD = $('<tr/>');
