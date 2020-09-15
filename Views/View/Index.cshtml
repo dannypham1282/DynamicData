@@ -35,10 +35,10 @@
                 <table>
                     <tr><td height="10" width="10" class="noedit" style="padding:0.1rem"></td><td width="5"></td><td><b> *note: none edit cell</b></td><td></td><td height="10" width="10" class="noedit"></td></tr>
                 </table>
-                <div class="container demo">
-                    <div class="modal left fade" id="mFieldAction" tabindex="" role="dialog" aria-labelledby="mFieldActionLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-                    </div>
+
+                <div class="modal left fade" id="mFieldAction" tabindex="" role="dialog" aria-labelledby="mFieldActionLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
                 </div>
+
 
 
                 <div class="modal fade" id="modelDeleteFieldConfirm" aria-modal="true" data-backdrop="static" data-keyboard="false">
@@ -174,15 +174,12 @@
                 });
             });
             editor.on('closed', function (e, node, data, items, type) {
-               // console.log($(".selectEditedCell"));
-              //  console.log(cellNewValue);
-              //  editor.field('amount').input().trigger('change');
                 $(".selectEditedCell").removeClass("selectEditedCell").html(cellNewValue);
-
             });
 
             viewTable = $('#viewData').DataTable({
-                fixedHeader: true,
+                //fixedHeader: true,
+                scrollY:650,
                 colReorder: true,
                 //stateSave: true,
                 "aLengthMenu": [[25, 50, 100,200,250,300,350,400, -1], [ 25, 50, 100,200,250,300,350,400, "All"]],
@@ -319,8 +316,6 @@
                  "drawCallback": function () {
                      $("#viewData tr th:first").removeClass("sorting_asc");
 
-                     // $("th[class^='dt_id_']").addClass("contextMenu");
-
                 },
                 "rowCallback": function (row, data, index) {
 
@@ -333,38 +328,11 @@
             });
 
             viewTable.on('column-reorder', function (e, settings, details) {
-                var colArray = [];
-                console.log($(viewTable.column(details.to).header()));
-                $("#viewData thead tr th").each(function () {
-                    var colName = $(this)[0].innerText;
-                    if (colName != "")
-                        colArray.push(colName);
-                });
+                $("th.sysdelete").html("<button class=\"btn btn-sm btn-outline-primary\" tabindex=\"0\" type=\"button\" title=\"Save Column Re-Ordering\"  onclick=\"SaveColReorder(this);\"><i class=\"fas fa-save\"></i></button>");
                 $('#viewData').DataTable().ajax.reload();
-                setTimeout(function () {
-                $.ajax({
-                    url: '@Url.Action("ReorderDataTableCol","View")',
-                    type: "Get",
-                    async: true,
-                    datatype: "json",
-                    traditional: true,
-                    data: { "libraryGuid": " @ViewData["libGuid"]", "fieldList": colArray },
-                    success: function (res) {
-                       // toastr.success(res.message);
-                    }
-                });
-                },3000);
-
             });
 
-            if (rowGroup == "") {
-                viewTable.rowGroup().disable().draw();
-            }
-            else {
-                viewTable.order.fixed({
-                    pre: [defaultSort, sortDirection]
-                });
-            }
+
 
 
             $(".buttons-create").removeClass("dt-button buttons-create").addClass("btn  btn-outline-primary").html("<i class=\"fa fa-plus\"></i> <span> New Record</span>");
@@ -374,6 +342,8 @@
 
 
         }
+
+
 
         $('#viewData').on('click', '.btn_removerow', function (e) {
             e.preventDefault();
@@ -389,18 +359,64 @@
         });
 
 
+        function SaveColReorder(ctl) {
+            var colArray = [];
+            $("#viewData thead tr th").each(function () {
+                    var colName = $(this)[0].innerText;
+                    if (colName != "")
+                        colArray.push(colName);
+                });
+                $.ajax({
+                    url: '@Url.Action("ReorderDataTableCol","View")',
+                    type: "Get",
+                    async: true,
+                    datatype: "json",
+                    traditional: true,
+                    data: { "libraryGuid": " @ViewData["libGuid"]", "fieldList": colArray },
+                    beforeSend: function () {
+                        $(".dataTables_scrollHeadInner").find("table th.sysdelete").html("<button class=\"btn btn-sm btn-outline-primary\" tabindex=\"0\" type=\"button\" title=\"Processing Please Wait\"><i class=\"fas fa-spinner fa-spin\"></i></button>");
+                    },
+                    success: function (res) {
+                        toastr.success(res.message);
+                        $(ctl).remove();
+                    },
+                    complete: function (data) {
+                        $("th.sysdelete").html("");
+                    }
+                });
+        }
+
         function appendDeleteButton() {
 
             var colButtun = "";
             if (fieldEditMode == 1) {
-                colButtun = "<div class=\"btn-group position-relative headeractionbutton\" style=\"float:right\">";
-                colButtun += "<a href=\"#\" class= \"btn btn-outline-primary btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\"><i class=\"fa fa-sm fa-edit\"></i></a><div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
+                colButtun = "<div class=\"btn-group position-relative headeractionbutton\" style=\"float:right\;position:inherit\">";
+                colButtun += "<a href=\"#\" class= \"btn btn-outline-primary btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\" onclick=\"setOverflow()\"><i class=\"fa fa-sm fa-edit\"></i></a><div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
                 colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"editColumn(this)\"><i class=\"fa fa-edit\"></i> Edit Column</a>";
                 colButtun += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showDeleteField(this)\"><i class=\"fa fa-trash\"></i>  Delete Column</a> <div class=\"dropdown-divider\"></div><a class=\"dropdown-item\" href=\"#\" onclick=\"showLinkLibraryModal(this)\"><i class=\"fa fa-link\"></i> Link Other Library</a>";
                 colButtun += "</div>";
-                $("th[class*='dt_id_']").append(colButtun);
+                $(".dataTables_scrollHeadInner").find("th[class*= 'dt_id_']").append(colButtun);
+            }
+            if (rowGroup == "") {
+                viewTable.rowGroup().disable().draw();
+            }
+            else {
+                viewTable.order.fixed({
+                    pre: [defaultSort, sortDirection]
+                });
+               // $(".dataTables_scrollHeadInner").find("table thead tr:first").remove();
             }
 
+        }
+
+        function setOverflow() {
+            $('.dataTables_scroll').on('show.bs.dropdown', function () {
+                $('.dataTables_scroll').css("overflow", "inherit");
+            });
+
+            $('.dataTables_scroll').on('hide.bs.dropdown', function () {
+                $('.dataTables_scroll').css("overflow", "auto");
+            })
         }
 
 
@@ -637,10 +653,13 @@
         function setEditFieldMode() {
             if (fieldEditMode == 0) {
                 $("#editFieldMode").empty().html("<i class=\"fas fa-cog\"></i> Cancel Edit Field Mode");
+                $(".dataTables_scrollHeadInner").find("table thead").append("<tr class=\"row\"></tr>");
                 fieldEditMode = 1;
             }
             else if (fieldEditMode == 1) {
                 $("#editFieldMode").empty().html("<i class=\"fas fa-cog\"></i> Edit Field Mode");
+                $(".dataTables_scrollHeadInner").find("table thead").append("<tr class=\"row\"></tr>");
+                //$(".dataTables_scrollHeadInner").find("table thead tr:first").remove();
                 fieldEditMode = 0;
             }
             $('#viewData').DataTable().destroy();

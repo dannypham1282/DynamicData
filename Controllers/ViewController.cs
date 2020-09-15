@@ -562,11 +562,11 @@ namespace DynamicData.Controllers
                     }
                 }
 
-                return new JsonResult(new { status = status, result = "Columns re-order completed" });
+                return new JsonResult(new { status = status, message = "Columns re-order completed" });
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { status = status, result = ex.Message });
+                return new JsonResult(new { status = status, message = ex.Message });
             }
         }
     }

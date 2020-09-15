@@ -179,6 +179,7 @@ namespace DynamicData.Controllers
                     Guid = Guid.Parse(guid);
                 var field = await _iField.Find(Guid);
                 await _iFieldValue.DeleteByFieldAndLibrary(field.ID, (!string.IsNullOrEmpty(libraryGuid)) ? Guid.Parse(libraryGuid) : Guid.Empty);
+                _iCommon.SPNonQuery("spRemoveLinkLibraryWhenDeleteField '" + field.GUID + "'");
                 await _iField.Delete(field);
 
                 //await _iFieldValue.Delete(fieldValue);
