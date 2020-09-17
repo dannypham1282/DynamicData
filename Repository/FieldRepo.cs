@@ -78,6 +78,11 @@ namespace DynamicData.Repository
             return field;
         }
 
+        public async Task<List<Field>> FindByLibraryGuid(Guid libraryGuid)
+        {
+            return await _context.Field.Where(w => w.LibraryGuid == libraryGuid).AsNoTracking().ToListAsync();
+        }
+
         public async Task<Field> Find(Guid Guid)
         {
             return await _context.Field.Where(w => w.GUID == Guid).AsNoTracking().FirstOrDefaultAsync();

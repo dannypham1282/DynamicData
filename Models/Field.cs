@@ -52,6 +52,10 @@ namespace DynamicData.Models
         [AllowNull]
         public List<FieldType> FieldTypeCollection { get; set; }
 
+        [NotMapped]
+        [DisplayName("Field")]
+        public List<Field> FieldCollection { get; set; }
+
         [DisplayName("Link to Library")]
         [AllowNull]
         public Guid? LookupTable { get; set; }
@@ -59,6 +63,9 @@ namespace DynamicData.Models
         [NotMapped]
         [AllowNull]
         public List<Library> LibraryCollection { get; set; }
+
+        [NotMapped]
+        public Guid? FormularLibraryGuid { get; set; }
 
         [AllowNull]
         public Guid? LookUpId { get; set; }
@@ -117,6 +124,8 @@ namespace DynamicData.Models
 
         [DisplayName("Value From Other Library")]
         public string ValueFromOtherLibrary { get; set; }
+
+        public string Formular { get; set; }
         public Field()
         {
             this.GUID = System.Guid.NewGuid();

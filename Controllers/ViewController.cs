@@ -93,6 +93,7 @@ namespace DynamicData.Controllers
             string rowGroup = "";
             string sortDirection = "";
             int defaultSort = 0;
+            var multipleSort = new List<string[]>();
             if (guid != "")
             {
                 Guid libGuid = Guid.Parse(guid);
@@ -117,12 +118,18 @@ namespace DynamicData.Controllers
                 foreach (Field field in fields)
                 {
                     if (field.Grouping == 1)
-                        rowGroup = field.Name.ToLower();
-                    if (field.DefaultSort == 1)
                     {
+                        rowGroup = field.Name.ToLower();
                         defaultSort = fieldCount;
                         sortDirection = field.SortDirection;
+                        multipleSort.Insert(0, (new string[] { (fieldCount + 2).ToString(), field.SortDirection }));
                     }
+
+                    if (field.DefaultSort == 1)
+                    {
+                        multipleSort.Add(new string[] { (fieldCount + 2).ToString(), field.SortDirection });
+                    }
+
 
                     dtCol = new DataTableColumns();
                     dtCol.data = field.Name.ToLower();
@@ -155,7 +162,8 @@ namespace DynamicData.Controllers
                 result = dataTableCol,
                 rowGroup = rowGroup,
                 defaultSort = defaultSort + 2,
-                sortDirection = sortDirection
+                sortDirection = sortDirection,
+                multipleSort = multipleSort
             });
         }
 

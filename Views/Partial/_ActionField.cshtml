@@ -54,7 +54,7 @@
                     <div class="col-sm-3">
                         @Html.LabelFor(x => x.SortDirection, new { @class = "col-form-label text-sm-right" })
                         @Html.DropDownListFor(model => model.SortDirection, new SelectList(new List<SelectListItem>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            {
                                     new SelectListItem { Text = "asc", Value = "asc"},
                                     new SelectListItem { Text = "desc", Value = "desc"}}, "Value", "Text"), new { @class = "form-control", @placeholder = "Field Type" })
                         <span asp-validation-for="SortDirection" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
@@ -114,17 +114,46 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-sm-12">
-                        <hr />
+                    <div class="col-sm-3">
+                        <h5>Formular:</h5>
+                    </div>
+                    <div class="col-sm-9"></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">
+                        @Html.LabelFor(x => x.LibraryCollection, new { @class = "col-form-label text-sm-right" })
+                        @Html.DropDownListFor(model => model.FormularLibraryGuid, new SelectList(Model.LibraryCollection, "GUID", "Title"), "Select Library", new { @class = "form-control", @placeholder = "Field Type" })
+                        <span asp-validation-for="FormularLibraryGuid" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+
+                    </div>
+                    <div class="col-sm-4">
+                        @Html.LabelFor(x => x.FieldCollection, new { @class = "col-form-label text-sm-right" })
+                        @Html.DropDownListFor(model => model.FieldCollection, new SelectList(Model.FieldCollection, "GUID", "Title"), "Select Field", new { @class = "form-control ", @placeholder = "Library Type" })
+                        <span asp-validation-for="FieldCollection" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <label class="col-form-label text-sm-right" for="ddlFormularOper">Functions</label>
+                        <select id="ddlFormularOper" class="form-control">
+                            <option value="" selected>--Select Function--</option>
+                            <option value="MonthYear()">MonthYear()</option>
+                            <option value="Year()">Year()</option>
+                            <option value="TopRecord()">TopRecord()</option>
+                            <option value="Sum()">Sum()</option>
+                            <option value="Total()">Total()</option>
+                        </select>
+                    </div>
 
+                </div>
             </div>
+
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-outline-primary">Save Changes</button>
             </div>
         </div>
     </div>
-
 </form>

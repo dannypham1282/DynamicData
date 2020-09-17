@@ -104,6 +104,7 @@
         var sortDirection;
         var fieldEditMode = 0;
         var colReorder = false;
+        var multilSort = [];
         $(document).ready(function () {
             $.fn.dataTable.moment('MM/DD/YYYY');
             $.fn.dataTable.moment('D-MMM-YY');
@@ -193,7 +194,7 @@
                     columns: ':not(:first-child)',
                     editor: editor
                 },
-                aaSorting: [[defaultSort, sortDirection]],
+                aaSorting: multilSort,//[[defaultSort, sortDirection],["4","asc"]],
                // orderFixed: [[defaultSort, 'desc']],
                 rowGroup: {
                     dataSrc: rowGroup,
@@ -333,17 +334,11 @@
                 $('#viewData').DataTable().ajax.reload();
             });
 
-
-
-
             $(".buttons-create").removeClass("dt-button buttons-create").addClass("btn  btn-outline-primary").html("<i class=\"fa fa-plus\"></i> <span> New Record</span>");
             $(".buttons-print").removeClass("dt-button buttons-print").addClass("btn  btn-outline-secondary").html("<i class=\"fa fa-print\"></i> <span>Print</span>");
             $(".buttons-excel").removeClass("dt-button buttons-excel").addClass("btn  btn-outline-success").html("<i class=\"fas fa-file-excel\"></i> <span>Excel</span>");
             $(".buttons-pdf").removeClass("dt-button buttons-pdf").addClass("btn  btn-outline-danger").html("<i class=\"fas fas fa-file-pdf\"></i> <span>PDF</span>");
-
-
         }
-
 
 
         $('#viewData').on('click', '.btn_removerow', function (e) {
@@ -354,11 +349,6 @@
                 buttons: 'Delete'
             });
         });
-
-        $('#viewData').on('click', '.dtrg-group', function () {
-
-        });
-
 
         function SaveColReorder(ctl) {
             var colArray = [];
@@ -388,7 +378,6 @@
         }
 
         function appendDeleteButton() {
-
             var colButtun = "";
             if (fieldEditMode == 1) {
                 colButtun = "<div class=\"btn-group position-relative headeractionbutton\" style=\"float:right\;position:inherit\">";
@@ -457,7 +446,7 @@
             defaultSort = response.defaultSort;
             sortDirection = response.sortDirection;
             var cols = response.result;
-
+            multilSort = response.multipleSort;
             return cols;
         }
 

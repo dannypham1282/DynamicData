@@ -22,6 +22,7 @@ namespace DynamicData.Interface
         public Task<Field> Find(Guid Guid);
         public Task<Field> FindByGuid(Guid Guid);
         public Task<Field> FindByID(int ID);
+        public Task<List<Field>> FindByLibraryGuid(Guid libraryGuid);
 
         public Task<Field> FindByNameAndLibraryGuid(string name, Guid libraryGuid);
         public Task<Field> FindByNameAndLibraryGuidWithoutType(string name, Guid libraryGuid);
