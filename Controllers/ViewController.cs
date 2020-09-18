@@ -333,6 +333,7 @@ namespace DynamicData.Controllers
                         {
                             await _iFieldValue.Add(newValue);
                         }
+                        // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
                         return new JsonResult(new { result = "New record has been updated." });
                     }
                 }
@@ -380,7 +381,7 @@ namespace DynamicData.Controllers
                                     return new JsonResult(new { status = false, result = validation.Status });
                             }
                             await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString());
-
+                            // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
                             return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
                         }
                     }

@@ -105,6 +105,7 @@
         var fieldEditMode = 0;
         var colReorder = false;
         var multilSort = [];
+        var isSorted = true;
         $(document).ready(function () {
             $.fn.dataTable.moment('MM/DD/YYYY');
             $.fn.dataTable.moment('D-MMM-YY');
@@ -179,10 +180,18 @@
                 $(".selectEditedCell").removeClass("selectEditedCell").html(cellNewValue);
             });
 
+            if (fieldEditMode == 1) {
+                isSorted = false;
+            }
+            else {
+                isSorted = true;
+            }
             viewTable = $('#viewData').DataTable({
                 //fixedHeader: true,
                 scrollY:650,
                 colReorder: colReorder,
+                //"ordering": isSorted,
+                "ordering": isSorted,
                 //stateSave: true,
                 "aLengthMenu": [[25, 50, 100,200,250,300,350,400, -1], [ 25, 50, 100,200,250,300,350,400, "All"]],
                 "language": {
@@ -313,10 +322,12 @@
                         $(row).find("td.classPercentage").each(function () {
                             $(this).html(percentageFormat($(this).html()));
                         });
+
                     }
                  },
                  "drawCallback": function () {
                      $("#viewData tr th:first").removeClass("sorting_asc");
+
 
                 },
                 "rowCallback": function (row, data, index) {
@@ -396,6 +407,8 @@
                 });
                // $(".dataTables_scrollHeadInner").find("table thead tr:first").remove();
             }
+
+
 
         }
 
@@ -643,9 +656,9 @@
         function setEditFieldMode() {
             if (fieldEditMode == 0) {
                 $("#editFieldMode").empty().html("<i class=\"fas fa-cog\"></i> Cancel Edit Field Mode");
-
                 colReorder = true;
                 fieldEditMode = 1;
+
             }
             else if (fieldEditMode == 1) {
                 $("#editFieldMode").empty().html("<i class=\"fas fa-cog\"></i> Edit Field Mode");
@@ -656,6 +669,20 @@
             $('#viewData').DataTable().destroy();
             $('#viewData').empty();
             initialDataTable();
+        }
+
+        function setFormularFunction() {
+            var func = $("#ddlFormularOper").val();
+            var library = $("#FormularLibraryGuid :selected").val();
+            var field = $("#FieldCollection :selected").val();
+            if (field == "")
+                field = "Field";
+            if (library == "")
+                library == "Library";
+            console.log(library);
+            $("#Formular").val(func + "[L_" + library + "][F_" + field + "]");
+            $("#FormularView").val(func + "[" + $("#FormularLibraryGuid :selected").text() + "]([" + $("#FieldCollection :selected").text() + "])");
+            console.log($("#Formular").val());
         }
 
     </script>

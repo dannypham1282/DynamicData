@@ -6,6 +6,7 @@
     @Html.HiddenFor(model => model.LookupTable)
     @Html.HiddenFor(model => model.LookUpId)
     @Html.HiddenFor(model => model.LookUpValue)
+    @Html.HiddenFor(model => model.Formular)
     @if (Model.ID > 0)
     {
 
@@ -54,7 +55,7 @@
                     <div class="col-sm-3">
                         @Html.LabelFor(x => x.SortDirection, new { @class = "col-form-label text-sm-right" })
                         @Html.DropDownListFor(model => model.SortDirection, new SelectList(new List<SelectListItem>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                                     new SelectListItem { Text = "asc", Value = "asc"},
                                     new SelectListItem { Text = "desc", Value = "desc"}}, "Value", "Text"), new { @class = "form-control", @placeholder = "Field Type" })
                         <span asp-validation-for="SortDirection" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
@@ -122,13 +123,13 @@
                 <div class="row">
                     <div class="col-sm-8">
                         @Html.LabelFor(x => x.LibraryCollection, new { @class = "col-form-label text-sm-right" })
-                        @Html.DropDownListFor(model => model.FormularLibraryGuid, new SelectList(Model.LibraryCollection, "GUID", "Title"), "Select Library", new { @class = "form-control", @placeholder = "Field Type" })
+                        @Html.DropDownListFor(model => model.FormularLibraryGuid, new SelectList(Model.LibraryCollection, "GUID", "Title"), "Select Library", new { @class = "form-control", @placeholder = "Field Type", onchange = "setFormularFunction()" })
                         <span asp-validation-for="FormularLibraryGuid" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
 
                     </div>
                     <div class="col-sm-4">
                         @Html.LabelFor(x => x.FieldCollection, new { @class = "col-form-label text-sm-right" })
-                        @Html.DropDownListFor(model => model.FieldCollection, new SelectList(Model.FieldCollection, "GUID", "Title"), "Select Field", new { @class = "form-control ", @placeholder = "Library Type" })
+                        @Html.DropDownListFor(model => model.FieldCollection, new SelectList(Model.FieldCollection, "GUID", "Title"), "Select Field", new { @class = "form-control ", @placeholder = "Library Type", onchange = "setFormularFunction()" })
                         <span asp-validation-for="FieldCollection" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
 
                     </div>
@@ -136,7 +137,7 @@
                 <div class="row">
                     <div class="col-sm-3">
                         <label class="col-form-label text-sm-right" for="ddlFormularOper">Functions</label>
-                        <select id="ddlFormularOper" class="form-control">
+                        <select id="ddlFormularOper" name="ddlFormularOper" class="form-control" onchange="setFormularFunction()">
                             <option value="" selected>--Select Function--</option>
                             <option value="MonthYear()">MonthYear()</option>
                             <option value="Year()">Year()</option>
@@ -146,6 +147,13 @@
                         </select>
                     </div>
 
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        @Html.LabelFor(x => x.Formular, new { @class = "col-form-label text-sm-right" })
+                        @*@Html.EditorFor(model => model.Formular, new { htmlAttributes = new { @class = "form-control", @placeholder = "Formular" } })*@
+                        <input class="form-control text-box single-line" id="FormularView" name="FormularView" placeholder="Formular" type="text" value="">
+                    </div>
                 </div>
             </div>
 
