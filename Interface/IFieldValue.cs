@@ -29,5 +29,7 @@ namespace DynamicData.Interface
 
         public Task<bool> CheckDuplicateFieldValue(int fieldID, string value);
 
+        public Task<bool> CalculateFormularField(int ItemID, Guid libraryGuid, Guid? currentFieldGuid);
+
     }
 }

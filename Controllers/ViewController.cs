@@ -92,6 +92,7 @@ namespace DynamicData.Controllers
             List<DataTableColumns> dataTableCol = new List<DataTableColumns>();
             string rowGroup = "";
             string sortDirection = "";
+            string keysColumn = ""; //this datatables keys column is the exclue column for the double click for none edit cell
             int defaultSort = 0;
             var multipleSort = new List<string[]>();
             if (guid != "")
@@ -117,6 +118,10 @@ namespace DynamicData.Controllers
                 int fieldCount = 0;
                 foreach (Field field in fields)
                 {
+                    if ((field.Editable == 0) && (field.Visible == 1))
+                    {
+                        keysColumn += ":not(:nth-child(" + (fieldCount + 2) + "))";
+                    }
                     if (field.Grouping == 1)
                     {
                         rowGroup = field.Name.ToLower();
@@ -133,7 +138,10 @@ namespace DynamicData.Controllers
 
                     dtCol = new DataTableColumns();
                     dtCol.data = field.Name.ToLower();
-                    dtCol.title = field.Title;
+                    if (field.FieldType.Type.ToLower() != "button")
+                        dtCol.title = field.Title;
+                    else
+                        dtCol.title = "";
                     dtCol.visible = (field.Visible == 1) ? true : false;
                     dtCol.orderable = true;
                     if (field.FieldType.Type.ToLower() == "currency")
@@ -146,13 +154,18 @@ namespace DynamicData.Controllers
                         dtCol.render = null;
                         dtCol.className += " classPercentage ";
                     }
+                    else if (field.FieldType.Type.ToLower() == "button")
+                    {
+                        dtCol.render = null;
+                        dtCol.className += " classButton buttonName_" + field.Title.Replace(" ", "_") + " ";
+                    }
                     else
                     {
                         dtCol.render = "";
                         dtCol.className = " ";
                     }
                     dtCol.className += "dt_id_" + field.GUID + " ";
-                    dtCol.className += (field.Editable == 1) ? "editable" : "noedit";
+                    dtCol.className += ((field.Editable == 1) || (field.FieldType.Type.ToLower() == "button")) ? "editable" : "editdisable";
                     dataTableCol.Add(dtCol);
                     fieldCount++;
                 }
@@ -163,7 +176,8 @@ namespace DynamicData.Controllers
                 rowGroup = rowGroup,
                 defaultSort = defaultSort + 2,
                 sortDirection = sortDirection,
-                multipleSort = multipleSort
+                multipleSort = multipleSort,
+                keysColumn = keysColumn
             });
         }
 
@@ -333,6 +347,8 @@ namespace DynamicData.Controllers
                         {
                             await _iFieldValue.Add(newValue);
                         }
+
+                        await _iFieldValue.CalculateFormularField(item.ID, libraryGuid, null);
                         // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
                         return new JsonResult(new { result = "New record has been updated." });
                     }
@@ -348,41 +364,50 @@ namespace DynamicData.Controllers
                             var item = await _iItem.FindByID(itemID);
                             var filedName = keys[1].ToString().Trim();
                             var fieldValue = await _iFieldValue.FindbyNameAndLibraryGuidAndItemID(filedName, libraryGuid, itemID);
+
                             if (fieldValue == null) //propably new field just added to to the library, no field record has been added yet. Add new field to library record
                             {
 
                                 var newField = await _iField.FindByNameAndLibraryGuid(filedName, libraryGuid);
-                                fieldValue = new FieldValue();
-                                //fieldValue.Field = newField;
-                                fieldValue.Value = HttpContext.Request.Form[key].ToString();
-                                var validation = ValidateForm(newField, HttpContext.Request.Form[key].ToString());
-                                if (validation.Status == null)
+                                if (newField.Editable > 0)
                                 {
-                                    fieldValue.Item = item;
-                                    fieldValue.FieldID = newField.ID;
-                                    fieldValue.ItemGuid = item.GUID;
-                                    fieldValue.LibraryGuid = libraryGuid;
-                                    fieldValue.Updated = DateTime.Now;
-                                    await _iFieldValue.Add(fieldValue);
+                                    fieldValue = new FieldValue();
+                                    //fieldValue.Field = newField;
+                                    fieldValue.Value = HttpContext.Request.Form[key].ToString();
+                                    var validation = ValidateForm(newField, HttpContext.Request.Form[key].ToString());
+                                    if (validation.Status == null)
+                                    {
+                                        fieldValue.Item = item;
+                                        fieldValue.FieldID = newField.ID;
+                                        fieldValue.ItemGuid = item.GUID;
+                                        fieldValue.LibraryGuid = libraryGuid;
+                                        fieldValue.Updated = DateTime.Now;
+                                        await _iFieldValue.Add(fieldValue);
+                                    }
+                                    else
+                                        return new JsonResult(new { status = false, result = validation.Status });
                                 }
-                                else
-                                    return new JsonResult(new { status = false, result = validation.Status });
                             }
                             else
                             {
-                                var validation = ValidateForm(fieldValue.Field, HttpContext.Request.Form[key].ToString());
-                                if (validation.Status == null)
+                                if (fieldValue.Field.Editable > 0)// only update field with that allow to edit 
                                 {
-                                    fieldValue.Value = HttpContext.Request.Form[key].ToString();
-                                    fieldValue.Updated = DateTime.Now;
-                                    await _iFieldValue.Update(fieldValue);
+                                    var validation = ValidateForm(fieldValue.Field, HttpContext.Request.Form[key].ToString());
+                                    if (validation.Status == null)
+                                    {
+                                        fieldValue.Value = HttpContext.Request.Form[key].ToString();
+                                        fieldValue.Updated = DateTime.Now;
+                                        await _iFieldValue.Update(fieldValue);
+                                    }
+                                    else
+                                        return new JsonResult(new { status = false, result = validation.Status });
+
+                                    await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString());
+                                    await _iFieldValue.CalculateFormularField(fieldValue.ItemID, libraryGuid, fieldValue.Field.GUID);
+                                    // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
+                                    return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
                                 }
-                                else
-                                    return new JsonResult(new { status = false, result = validation.Status });
                             }
-                            await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString());
-                            // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
-                            return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
                         }
                     }
                 }
@@ -393,11 +418,15 @@ namespace DynamicData.Controllers
                     await _iItem.Delete(Convert.ToInt32(keys[0]));
                     return new JsonResult(new { result = "Record has been deleted" });
                 }
-                return new JsonResult(new { result = "success" });
+                //  return new JsonResult(new { result = "success" });
+                return new JsonResult(new { status = "noaction" });
             }
             catch (Exception ex)
             {
-                return new JsonResult(new { result = ex.Message });
+                return new JsonResult(new
+                {
+                    result = ex.Message
+                });
             }
         }
 

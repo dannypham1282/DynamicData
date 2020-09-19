@@ -33,7 +33,7 @@
                     <thead><tr></tr></thead>
                 </table>
                 <table>
-                    <tr><td height="10" width="10" class="noedit" style="padding:0.1rem"></td><td width="5"></td><td><b> *note: none edit cell</b></td><td></td><td height="10" width="10" class="noedit"></td></tr>
+                    <tr><td height="10" width="10" class="editdisable" style="padding:0.1rem"></td><td width="5"></td><td><b> *note: none edit cell</b></td><td></td><td height="10" width="10" class="editdisable"></td></tr>
                 </table>
 
                 <div class="modal left fade" id="mFieldAction" tabindex="" role="dialog" aria-labelledby="mFieldActionLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -106,6 +106,7 @@
         var colReorder = false;
         var multilSort = [];
         var isSorted = true;
+        var keysColumn = "";
         $(document).ready(function () {
             $.fn.dataTable.moment('MM/DD/YYYY');
             $.fn.dataTable.moment('D-MMM-YY');
@@ -144,14 +145,16 @@
                               data: function(data) {
                                 //  console.log(data)
                               },
-                        success: function (res) {
-                            if (res.status) {
-                               $('#viewData').DataTable().ajax.reload();
-                                toastr.success(res.result);
-                            }
-                            else {
-                                toastr.error(res.result);
-                            }
+                          success: function (res) {
+                              if (res.status != 'noaction') {
+                                  if (res.status) {
+                                      $('#viewData').DataTable().ajax.reload();
+                                      toastr.success(res.result);
+                                  }
+                                  else {
+                                      toastr.error(res.result);
+                                  }
+                              }
                         }
                     },
                     remove: {
@@ -200,7 +203,7 @@
                 dom: "Blfrtip",
                 columns: getDataTableColumns(),
                 keys: {
-                    columns: ':not(:first-child)',
+                    columns: ':not(:first-child)' + keysColumn,
                     editor: editor
                 },
                 aaSorting: multilSort,//[[defaultSort, sortDirection],["4","asc"]],
@@ -305,25 +308,44 @@
                     var tdIndex = $(row).find("td.sysdelete").index();
                     var currencyIndex = $(row).find("td.classCurrency").index();
                     var percentageIndex = $(row).find("td.classPercentage").index();
+                    var buttunIndex = $(row).find("td.classButton").index();
 
                      if (tdIndex > -1) {//insert delete button
                          var td = $(row).find("td.sysdelete");
                          td.html("<button class=\"btn btn-xs btn-danger btn_removerow\" ><i class=\"fa  fa-trash\"></i></button>");
                      }
+
+                    //set currency column
                     if (currencyIndex > -1) {
                         $(row).find("td.classCurrency").each(function () {
                             if ($(this).html().indexOf("-") > -1)
                                 $(this).css("color", "red");
                             $(this).html(accounting.formatMoney($(this).html()));
-                        });
-
+                        })
                     }
+
+                    //set percentage column
                     if (percentageIndex > -1) {
                         $(row).find("td.classPercentage").each(function () {
                             $(this).html(percentageFormat($(this).html()));
                         });
-
                     }
+
+                    if (buttunIndex > -1) {
+                        $(row).find("td.classButton").each(function () {
+                            var $tdClass = $(this).attr("class").split(' ');
+                            var buttonName;
+                            $.each($tdClass, function (key, value) {
+                                if (value.indexOf("buttonName_") > -1) {
+                                    buttonName = value.replace("buttonName_", "").replace("_"," ");
+                                    return false;
+                                }
+                            });
+                            $(this).html("<button class=\"btn btn-sm btn-primary\"><i class=\"fas fa-binoculars\"></i> " + buttonName + "</button>");
+                        });
+                    }
+                    //set button column
+
                  },
                  "drawCallback": function () {
                      $("#viewData tr th:first").removeClass("sorting_asc");
@@ -351,6 +373,18 @@
             $(".buttons-pdf").removeClass("dt-button buttons-pdf").addClass("btn  btn-outline-danger").html("<i class=\"fas fas fa-file-pdf\"></i> <span>PDF</span>");
         }
 
+        $("td.noedit").on('click', function (event) {
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            alert("test")
+
+        });
+
+        //$('#viewData').on('click', '.editdisable', function (e) {
+        //    e.stopPropagation();
+        //    e.stopImmediatePropagation();
+        //    $(this).parent().find("td").removeClass('focus');
+        //});
 
         $('#viewData').on('click', '.btn_removerow', function (e) {
             e.preventDefault();
@@ -365,8 +399,19 @@
             var colArray = [];
             $("#viewData thead tr th").each(function () {
                     var colName = $(this)[0].innerText;
-                    if (colName != "")
-                        colArray.push(colName);
+                if (colName != "")
+                    colArray.push(colName);
+                else {
+                    var $tdClass = $(this).attr("class").split(' ');
+                    var buttonName;
+                    $.each($tdClass, function (key, value) {
+                        if (value.indexOf("buttonName_") > -1) {
+                            buttonName = value.replace("buttonName_", "").replace("_", " ");
+                            return false;
+                        }
+                    });
+                    colArray.push(buttonName);
+                }
                 });
                 $.ajax({
                     url: '@Url.Action("ReorderDataTableCol","View")',
@@ -460,6 +505,7 @@
             sortDirection = response.sortDirection;
             var cols = response.result;
             multilSort = response.multipleSort;
+            keysColumn = response.keysColumn;
             return cols;
         }
 
@@ -680,7 +726,7 @@
             if (library == "")
                 library == "Library";
             console.log(library);
-            $("#Formular").val(func + "[L_" + library + "][F_" + field + "]");
+            $("#Formular").val(func + "[L_" + library + "]([F_" + field + "])");
             $("#FormularView").val(func + "[" + $("#FormularLibraryGuid :selected").text() + "]([" + $("#FieldCollection :selected").text() + "])");
             console.log($("#Formular").val());
         }

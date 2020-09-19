@@ -126,6 +126,7 @@ namespace DynamicData.Models
         public string ValueFromOtherLibrary { get; set; }
 
         public string Formular { get; set; }
+        public string FormularView { get; set; }
         public Field()
         {
             this.GUID = System.Guid.NewGuid();
