@@ -94,11 +94,12 @@ namespace DynamicData.Controllers
             string sortDirection = "";
             string keysColumn = ""; //this datatables keys column is the exclue column for the double click for none edit cell
             int defaultSort = 0;
+            var fields = new List<Field>();
             var multipleSort = new List<string[]>();
             if (guid != "")
             {
                 Guid libGuid = Guid.Parse(guid);
-                var fields = await _iField.FieldCollection(libGuid);
+                fields = await _iField.FieldCollection(libGuid);
                 DataTableColumns dtCol = new DataTableColumns();
                 dtCol.data = "id";
                 dtCol.title = "";
@@ -177,8 +178,9 @@ namespace DynamicData.Controllers
                 defaultSort = defaultSort + 2,
                 sortDirection = sortDirection,
                 multipleSort = multipleSort,
-                keysColumn = keysColumn
-            });
+                keysColumn = keysColumn,
+                AllFields = fields.Where(w => w.Name != "CreatedDate" && w.Name != "CreatedBy").Select(s => new { s.GUID, s.Title })
+            }); ;
         }
 
         public async Task<IActionResult> DataTableColEditor(string guid)

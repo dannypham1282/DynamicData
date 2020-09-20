@@ -70,6 +70,7 @@
 
                 <li class="nav-item">
                     <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+                        <button class="btn btn-sm btn-outline-primary btnAjaxWait" tabindex="0" type="button" title="Processing Please Wait" style="display:none"><i class="fas fa-spinner fa-spin"></i></button>
                         <button class="btn btn-sm btn-success" title="New Library" onclick="showAddModel('@Url.Action("ActionLibrary","Home")',0, 'mCreateLibrary', 'formLibrary',CreateGuid())">
                             <i class="ace-icon fa fa-tasks"></i>
                         </button>
@@ -79,6 +80,7 @@
                             <button class="btn btn-sm btn-danger" title="Permissions">
                                 <i class="ace-icon fa fa-lock"></i>
                             </button>*@
+
                         <button class="btn btn-sm btn-warning" title="Setting">
                             <i class="fa fa-cogs"></i>
                         </button>
@@ -220,6 +222,16 @@
     </style>
 
     <script>
+
+        $(document).ajaxStart(function () {
+            $(".btnAjaxWait").show();
+        });
+
+        $(document).ajaxStop(function () {
+            setTimeout(function () { $(".btnAjaxWait").hide(); }, 1000);
+
+        });
+
         toastr.options = {
             "closeButton": false,
             "debug": false,

@@ -11,18 +11,20 @@
         </h3>
         <div class="card-tools">
             <div class="btn-group position-relative">
-
                 <button type="button" class="btn btn-outline-danger btn-sm dropdown-toggle dropdown-hover" data-toggle="dropdown">
                     <i class="fa fa-sm fa-cog"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-right" role="menu">
                     <a class="dropdown-item" href="#" onclick="showFieldModal('@Url.Action("_FieldAction","Partial")', 0, 'mFieldAction', 'formField','@ViewData["libGuid"]'); return false;"><i class="fas fa-plus"></i> Add New Field</a>
                     <a class="dropdown-item" href="#" id="editFieldMode" onclick="setEditFieldMode()"><i class="fas fa-cog"></i> Edit Field Mode</a>
-                    <a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Edit Hidden Fields</a>
-                    <a class="dropdown-item" href="#"><i class="fas fa-link"></i> Link Libraries</a>
+                    <a class="dropdown-item" href="#" onclick="viewLinkLibrary()"><i class="fas fa-link"></i> Link Libraries</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#"><i class="fas fa-house-user"></i> Set Permission</a>
                 </div>
+                &nbsp;<button type="button" class="btn btn-outline-success btn-sm btnCancelEditMode" title="Cancel Edit Mode" style="display:none" onclick="setEditFieldMode()">
+                    <i class="fas fa-reply-all"></i>
+                </button>
+
             </div>
         </div>
     </div>
@@ -107,6 +109,7 @@
         var multilSort = [];
         var isSorted = true;
         var keysColumn = "";
+        var allFields = [];
         $(document).ready(function () {
             $.fn.dataTable.moment('MM/DD/YYYY');
             $.fn.dataTable.moment('D-MMM-YY');
@@ -360,7 +363,11 @@
                 },
                 "initComplete": function (settings, json) {
                     appendDeleteButton();
-                    $(".dt-buttons").prepend("<button class=\"btn btn-outline-danger\" tabindex=\"0\" aria-controls=\"viewData\" type=\"button\"><i class=\"fa fa-eye\"></i><span> Hidden Columns</span></button>");
+                    var dropdownFieldList = "";
+                    $.each(allFields, function (key, value) {
+                        dropdownFieldList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showFieldModal('@Url.Action("_FieldAction","Partial")', '" + value.guid + "','mFieldAction', 'formField','@ViewData["libGuid"]');\"><i class=\"fas fa-edit\"></i> " + value.title + "</a>";
+                    });
+                    $(".dt-buttons").prepend("<button class=\"btn btn-outline-danger\" tabindex=\"0\" aria-controls=\"viewData\" type=\"button\" data-toggle=\"dropdown\"><i class=\"fa fa-eye\"></i><span> Columns</span></button><div class=\"dropdown-menu dropdown-menu\" role=\"menu\">" + dropdownFieldList + "</div>");
                 },
                 ajax: '@Url.Action("LoadData", "View")/@ViewData["libGuid"]'
             });
@@ -442,9 +449,6 @@
                 });
                // $(".dataTables_scrollHeadInner").find("table thead tr:first").remove();
             }
-
-
-
         }
 
         function setOverflow() {
@@ -496,6 +500,7 @@
             var cols = response.result;
             multilSort = response.multipleSort;
             keysColumn = response.keysColumn;
+            allFields = response.allFields;
             return cols;
         }
 
@@ -620,6 +625,14 @@
             $("#modelLinkLibrary").modal("show");
         }
 
+        function viewLinkLibrary() {
+            fieldGuid = CreateGuid();//if no field is selected to view the link library just create the random GUID so the code won't crash
+            $.get('@Url.Action("_LinkToLibrary","Partial")', { fieldGuid: fieldGuid, libraryGuid: "@ViewData["libGuid"]" }, function (res) {
+              $("#divLinkBody").html(res);
+            });
+            $("#modelLinkLibrary").modal("show");
+        }
+
         function AddLinkToLibrary() {
             var currentField = $("#SetField").val();
             var linkLibrary = $("#LinkToLibrary").val();
@@ -690,17 +703,19 @@
         }
 
         function setEditFieldMode() {
+            $(".btnAjaxWait").show();
             if (fieldEditMode == 0) {
                 $("#editFieldMode").empty().html("<i class=\"fas fa-cog\"></i> Cancel Edit Field Mode");
                 colReorder = true;
                 fieldEditMode = 1;
-
+                $(".btnCancelEditMode").show();
             }
             else if (fieldEditMode == 1) {
                 $("#editFieldMode").empty().html("<i class=\"fas fa-cog\"></i> Edit Field Mode");
                 $(".dataTables_scrollHeadInner").find("table thead").append("<tr class=\"row\"></tr>");
                 colReorder = false;
                 fieldEditMode = 0;
+                $(".btnCancelEditMode").hide();
             }
             $('#viewData').DataTable().destroy();
             $('#viewData').empty();
@@ -718,7 +733,7 @@
             console.log(library);
             $("#Formular").val(func + "[L_" + library + "]([F_" + field + "])");
             $("#FormularView").val(func + "[" + $("#FormularLibraryGuid :selected").text() + "]([" + $("#FieldCollection :selected").text() + "])");
-            console.log($("#Formular").val());
+
         }
 
     </script>
