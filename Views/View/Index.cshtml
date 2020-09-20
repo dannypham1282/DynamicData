@@ -264,7 +264,9 @@
                         }
                     },
                     {
-                        extend: "pdf",
+                        extend: "pdfHtml5",
+                        orientation: 'landscape',
+                        pageSize: 'LEGAL',
                         exportOptions: {
                             columns: ':visible:not(:first-child)',
                             format: {
@@ -357,7 +359,8 @@
 
                 },
                 "initComplete": function (settings, json) {
-                  appendDeleteButton();
+                    appendDeleteButton();
+                    $(".dt-buttons").prepend("<button class=\"btn btn-outline-danger\" tabindex=\"0\" aria-controls=\"viewData\" type=\"button\"><i class=\"fa fa-eye\"></i><span> Hidden Columns</span></button>");
                 },
                 ajax: '@Url.Action("LoadData", "View")/@ViewData["libGuid"]'
             });
@@ -372,19 +375,6 @@
             $(".buttons-excel").removeClass("dt-button buttons-excel").addClass("btn  btn-outline-success").html("<i class=\"fas fa-file-excel\"></i> <span>Excel</span>");
             $(".buttons-pdf").removeClass("dt-button buttons-pdf").addClass("btn  btn-outline-danger").html("<i class=\"fas fas fa-file-pdf\"></i> <span>PDF</span>");
         }
-
-        $("td.noedit").on('click', function (event) {
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            alert("test")
-
-        });
-
-        //$('#viewData').on('click', '.editdisable', function (e) {
-        //    e.stopPropagation();
-        //    e.stopImmediatePropagation();
-        //    $(this).parent().find("td").removeClass('focus');
-        //});
 
         $('#viewData').on('click', '.btn_removerow', function (e) {
             e.preventDefault();

@@ -20,7 +20,9 @@ namespace DynamicData.Controllers
         {
             _context = dbContext;
         }
-        public async Task<IActionResult> Login()
+
+
+        public IActionResult Login()
         {
             return View();
         }
@@ -89,10 +91,11 @@ namespace DynamicData.Controllers
 
         [HttpGet]
         [Route("Account/Logout")]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
-            await HttpContext.SignOutAsync();
-            return RedirectToAction("Login", "Account");
+            HttpContext.SignOutAsync();
+
+            return Redirect("/Account/Login");
         }
 
     }
