@@ -1,9 +1,9 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 namespace DynamicData.Migrations
 {
-    public partial class db : Migration
+    public partial class dbcontext : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -236,6 +236,34 @@ namespace DynamicData.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Organization",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
+                    Address = table.Column<string>(nullable: true),
+                    City = table.Column<string>(nullable: true),
+                    State = table.Column<string>(nullable: true),
+                    Zip = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
+                    Phone = table.Column<string>(nullable: true),
+                    POC_FirstName = table.Column<string>(nullable: true),
+                    POC_LastName = table.Column<string>(nullable: true),
+                    UserID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Organization", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Organization_User_UserID",
+                        column: x => x.UserID,
+                        principalTable: "User",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Role",
                 columns: table => new
                 {
@@ -306,7 +334,11 @@ namespace DynamicData.Migrations
                     Grouping = table.Column<int>(nullable: true),
                     SortOrder = table.Column<int>(nullable: true),
                     DefaultSort = table.Column<int>(nullable: true),
+                    CheckDubplicate = table.Column<int>(nullable: true),
                     SortDirection = table.Column<string>(nullable: true),
+                    ValueFromOtherLibrary = table.Column<string>(nullable: true),
+                    Formular = table.Column<string>(nullable: true),
+                    FormularView = table.Column<string>(nullable: true),
                     ItemID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -362,6 +394,32 @@ namespace DynamicData.Migrations
                         name: "FK_LibraryLog_Library_LibraryID",
                         column: x => x.LibraryID,
                         principalTable: "Library",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserOrganization",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserID = table.Column<int>(nullable: true),
+                    OrganizationID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserOrganization", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_UserOrganization_Organization_OrganizationID",
+                        column: x => x.OrganizationID,
+                        principalTable: "Organization",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserOrganization_User_UserID",
+                        column: x => x.UserID,
+                        principalTable: "User",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -560,6 +618,11 @@ namespace DynamicData.Migrations
                 column: "LibraryID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Organization_UserID",
+                table: "Organization",
+                column: "UserID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Role_UserID",
                 table: "Role",
                 column: "UserID");
@@ -568,6 +631,16 @@ namespace DynamicData.Migrations
                 name: "IX_SecurityGroup_PermissionID",
                 table: "SecurityGroup",
                 column: "PermissionID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserOrganization_OrganizationID",
+                table: "UserOrganization",
+                column: "OrganizationID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserOrganization_UserID",
+                table: "UserOrganization",
+                column: "UserID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRole_RoleID",
@@ -607,6 +680,9 @@ namespace DynamicData.Migrations
                 name: "LinkLibrary");
 
             migrationBuilder.DropTable(
+                name: "UserOrganization");
+
+            migrationBuilder.DropTable(
                 name: "UserRole");
 
             migrationBuilder.DropTable(
@@ -614,6 +690,9 @@ namespace DynamicData.Migrations
 
             migrationBuilder.DropTable(
                 name: "Field");
+
+            migrationBuilder.DropTable(
+                name: "Organization");
 
             migrationBuilder.DropTable(
                 name: "Role");

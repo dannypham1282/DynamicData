@@ -20,7 +20,7 @@ namespace DynamicData.Repository
         {
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
-            throw new NotImplementedException();
+            return user;
         }
 
         public async Task<bool> Delete(Guid Guid)
@@ -28,7 +28,8 @@ namespace DynamicData.Repository
             var user = FindByGUID(Guid);
             _context.Remove(user);
             await _context.SaveChangesAsync();
-            throw new NotImplementedException();
+            return true;
+
         }
 
         public async Task<bool> Delete(int ID)
@@ -36,7 +37,7 @@ namespace DynamicData.Repository
             var user = FindByID(ID);
             _context.Remove(user);
             await _context.SaveChangesAsync();
-            throw new NotImplementedException();
+            return true;
         }
 
         public void Dispose()
@@ -55,25 +56,34 @@ namespace DynamicData.Repository
             _context.Update(user);
             await _context.SaveChangesAsync();
             return user;
-            throw new NotImplementedException();
+
         }
 
         public async Task<User> FindByGUID(Guid Guid)
         {
             return await _context.User.Where(w => w.GUID == Guid).FirstOrDefaultAsync();
-            throw new NotImplementedException();
+
         }
 
         public async Task<User> FindByID(int ID)
         {
             return await _context.User.Where(w => w.ID == ID).FirstOrDefaultAsync();
-            throw new NotImplementedException();
+
         }
 
         public async Task<List<User>> UserCollection()
         {
             return await _context.User.ToListAsync();
-            throw new NotImplementedException();
+
         }
+
+
+
+        public async Task<List<User>> UserCollectionOrganization(int organizationID)
+        {
+            return await _context.User.Include(i => i.UserOrganization).ThenInclude(i => i.Organization.ID == organizationID).ToListAsync();
+        }
+
+
     }
 }

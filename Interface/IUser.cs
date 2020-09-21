@@ -8,6 +8,8 @@ namespace DynamicData.Interface
     public interface IUser : IDisposable
     {
         public Task<List<User>> UserCollection();
+
+        public Task<List<User>> UserCollectionOrganization(int organizationID);
         public Task<User> Add(User user);
         public Task<bool> Delete(Guid Guid);
         public Task<bool> Delete(int ID);

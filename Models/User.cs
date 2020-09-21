@@ -28,6 +28,8 @@ namespace DynamicData.Models
 
 
         public List<UserRole> UserRole { get; set; }
+        public List<UserOrganization> UserOrganization { get; set; }
+        public List<Organization> Organization { get; set; }
 
         public User()
         {

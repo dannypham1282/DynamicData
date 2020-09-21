@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DynamicData.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200908190337_db")]
-    partial class db
+    [Migration("20200921042103_dbcontext")]
+    partial class dbcontext
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -76,6 +76,9 @@ namespace DynamicData.Migrations
                     b.Property<int?>("ActionButonOpenLibraryID")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CheckDubplicate")
+                        .HasColumnType("int");
+
                     b.Property<int?>("DefaultSort")
                         .HasColumnType("int");
 
@@ -93,6 +96,12 @@ namespace DynamicData.Migrations
 
                     b.Property<int?>("FieldTypeID")
                         .HasColumnType("int");
+
+                    b.Property<string>("Formular")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FormularView")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("GUID")
                         .HasColumnType("uniqueidentifier");
@@ -132,6 +141,9 @@ namespace DynamicData.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ValueFromOtherLibrary")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Visible")
@@ -447,6 +459,50 @@ namespace DynamicData.Migrations
                     b.ToTable("LinkLibrary");
                 });
 
+            modelBuilder.Entity("DynamicData.Models.Organization", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("POC_FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("POC_LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("State")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Zip")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("Organization");
+                });
+
             modelBuilder.Entity("DynamicData.Models.Permission", b =>
                 {
                     b.Property<int>("ID")
@@ -542,6 +598,28 @@ namespace DynamicData.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("User");
+                });
+
+            modelBuilder.Entity("DynamicData.Models.UserOrganization", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("OrganizationID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("OrganizationID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("UserOrganization");
                 });
 
             modelBuilder.Entity("DynamicData.Models.UserRole", b =>
@@ -677,6 +755,13 @@ namespace DynamicData.Migrations
                         .HasForeignKey("LibraryID");
                 });
 
+            modelBuilder.Entity("DynamicData.Models.Organization", b =>
+                {
+                    b.HasOne("DynamicData.Models.User", null)
+                        .WithMany("Organization")
+                        .HasForeignKey("UserID");
+                });
+
             modelBuilder.Entity("DynamicData.Models.Role", b =>
                 {
                     b.HasOne("DynamicData.Models.User", null)
@@ -689,6 +774,17 @@ namespace DynamicData.Migrations
                     b.HasOne("DynamicData.Models.Permission", "Permission")
                         .WithMany()
                         .HasForeignKey("PermissionID");
+                });
+
+            modelBuilder.Entity("DynamicData.Models.UserOrganization", b =>
+                {
+                    b.HasOne("DynamicData.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationID");
+
+                    b.HasOne("DynamicData.Models.User", "User")
+                        .WithMany("UserOrganization")
+                        .HasForeignKey("UserID");
                 });
 
             modelBuilder.Entity("DynamicData.Models.UserRole", b =>

@@ -30,8 +30,9 @@ namespace DynamicData.Data
         public DbSet<UserRole> UserRole { get; set; }
         public DbSet<ItemFile> ItemFile { get; set; }
         public DbSet<ItemLog> ItemLog { get; set; }
-
         public DbSet<DefaultField> DefaultField { get; set; }
+        public DbSet<Organization> Organization { get; set; }
+        public DbSet<UserOrganization> UserOrganization { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 

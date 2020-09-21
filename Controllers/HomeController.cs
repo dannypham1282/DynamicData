@@ -218,9 +218,17 @@ namespace DynamicData.Controllers
             string requestGuid = Common.GetGuidFromURL(Request.Path.ToString());//Get guid from query string
             var navLib = _iLibrary.LibraryCollectionForSideMenu().Result;
             int rootID = navLib.Where(x => x.ParentID == null).FirstOrDefault().ID;
+            Guid currentOpenGuid = Guid.Empty;
             if (guid == null)
                 guid = requestGuid; // if guid pass from view is null then use the one in the url
-            Guid currentOpenGuid = (guid == null) ? Guid.Empty : (guid == "") ? Guid.Empty : Guid.Parse(guid);
+            try
+            {
+                currentOpenGuid = (guid == null) ? Guid.Empty : (guid == "") ? Guid.Empty : Guid.Parse(guid);
+            }
+            catch (Exception ex)
+            {
+                currentOpenGuid = Guid.Empty;
+            }
             string parentNodes = FindAllParents(navLib, currentOpenGuid);
             return Content(BuildSideMenu(navLib, rootID, parentNodes, requestGuid));
         }

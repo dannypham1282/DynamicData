@@ -17,32 +17,23 @@ namespace DynamicData.Controllers
         private readonly ILogger<ViewController> _logger;
         //define Repository Classes
         private readonly ILibrary _iLibrary;
-        private readonly ILibraryType _iLibraryType;
-        private readonly IUser _iUser;
         private readonly IItem _iItem;
         private readonly IField _iField;
-        private readonly IDefaultField _iDefaultField;
         private readonly IFieldValue _iFieldValue;
         private readonly ICommon _iCommon;
 
         public ViewController(
             ILogger<ViewController> logger,
             ILibrary iLibrary,
-            IUser iUser,
-            ILibraryType iLibraryType,
             IItem iItem,
             IField iField,
-            IDefaultField iDefaultField,
             IFieldValue iFieldValue,
             ICommon iCommon)
         {
             _logger = logger;
             _iLibrary = iLibrary;
-            _iLibraryType = iLibraryType;
-            _iUser = iUser;
             _iItem = iItem;
             _iField = iField;
-            _iDefaultField = iDefaultField;
             _iFieldValue = iFieldValue;
             _iCommon = iCommon;
         }
