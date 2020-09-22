@@ -1,5 +1,6 @@
 ﻿using DynamicData.Data;
 using System;
+using System.Reflection;
 
 namespace DynamicData.Models
 {
@@ -32,6 +33,20 @@ namespace DynamicData.Models
 
             }
             return keys;
+        }
+        public static void SetProperty(Object dynamicObject, string propertyName, object value)
+        {
+            Type type = dynamicObject.GetType();
+            object result;
+            result = type.InvokeMember(
+                propertyName,
+                BindingFlags.SetProperty |
+                BindingFlags.IgnoreCase |
+                BindingFlags.Public |
+                BindingFlags.Instance,
+                null,
+                dynamicObject,
+                new object[] { value });
         }
 
     }

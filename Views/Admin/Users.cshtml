@@ -48,8 +48,8 @@
                         type: 'POST',
                         url: editCellUrl,
                         success: function (res) {
-                            if (res.result) {
-                                toastr.success(res.result);
+                            if (res.status) {
+                                toastr.success(res.message);
                                 $('#UserTable').DataTable().ajax.reload();
                             }
                         }
@@ -61,13 +61,14 @@
                                 //  console.log(data)
                               },
                           success: function (res) {
+
                               if (res.status != 'noaction') {
                                   if (res.status) {
                                       $('#UserTable').DataTable().ajax.reload();
-                                      toastr.success(res.result);
+                                      toastr.success(res.message);
                                   }
                                   else {
-                                      toastr.error(res.result);
+                                      toastr.error(res.message);
                                   }
                               }
                         }
@@ -87,7 +88,7 @@
                       {
                           label: "UserName:",
                           name: "username",
-                          type: "hidden"
+
                       },{
                       label: "First Name:",
                       name: "firstname"
@@ -127,8 +128,8 @@
                                 dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-list\" ></i> Organization</a>";
                                 dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-user-tag\" ></i> Roles</a>";
                                 dropList += "<div class=\"dropdown-divider\"></div>";
-                                dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-key\" ></i> Update Password</a>";
-                                dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-trash\" ></i> Delete</a>";
+                                dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"updateUserPassword('" + data + "')\"><i class=\"fas fa-key\" ></i> Update Password</a>";
+                                dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" ><i class=\"fas fa-trash\" ></i> Delete</a>";
                                 dropList +="</div>";
                                 return "<button type=\"button\" class=\"btn btn-outline-danger btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\" aria-expanded=\"true\"><i class=\"fa fa-sm fa-list\"></i> Action</button>" + dropList;
                             },
@@ -142,7 +143,8 @@
 
                     ],
                 keys: {
-                    columns: ':not(:first-child):not(:nth-child(2))',
+                   // columns: ':not(:first-child):not(:nth-child(2))',
+                    columns: ':not(:first-child)',
                     editor: editor
                 },
                 aaSorting: [[1,"asc"]],
@@ -234,7 +236,19 @@
             $(".buttons-print").removeClass("dt-button buttons-print").addClass("btn  btn-outline-secondary").html("<i class=\"fa fa-print\"></i> <span>Print</span>");
             $(".buttons-excel").removeClass("dt-button buttons-excel").addClass("btn  btn-outline-success").html("<i class=\"fas fa-file-excel\"></i> <span>Excel</span>");
             $(".buttons-pdf").removeClass("dt-button buttons-pdf").addClass("btn  btn-outline-danger").html("<i class=\"fas fas fa-file-pdf\"></i> <span>PDF</span>");
+
+                $('#viewData').on('click', '.btn_removerow', function (e) {
+                    console.log(e);
+                    e.preventDefault();
+                    editor.remove($(this).closest('tr'), {
+                        title: 'Delete record',
+                        message: 'Are you sure you wish to remove this record?',
+                        buttons: 'Delete'
+                    });
+                });
         }
+
+
 
     </script>
 }

@@ -11,6 +11,7 @@ namespace DynamicData.Interface
 
         public Task<List<User>> UserCollectionOrganization(int organizationID);
         public Task<User> Add(User user);
+        public Task<User> Update(User user);
         public Task<bool> Delete(Guid Guid);
         public Task<bool> Delete(int ID);
         public Task<User> Edit(User user);

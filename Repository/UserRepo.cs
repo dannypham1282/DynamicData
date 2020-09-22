@@ -23,6 +23,20 @@ namespace DynamicData.Repository
             return user;
         }
 
+        public async Task<User> Update(User user)
+        {
+            try
+            {
+                _context.User.Update(user);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return user;
+        }
+
         public async Task<bool> Delete(Guid Guid)
         {
             var user = FindByGUID(Guid);
@@ -61,13 +75,13 @@ namespace DynamicData.Repository
 
         public async Task<User> FindByGUID(Guid Guid)
         {
-            return await _context.User.Where(w => w.GUID == Guid).FirstOrDefaultAsync();
+            return await _context.User.Where(w => w.GUID == Guid).AsNoTracking().FirstOrDefaultAsync();
 
         }
 
         public async Task<User> FindByID(int ID)
         {
-            return await _context.User.Where(w => w.ID == ID).FirstOrDefaultAsync();
+            return await _context.User.Where(w => w.ID == ID).AsNoTracking().FirstOrDefaultAsync();
 
         }
 
