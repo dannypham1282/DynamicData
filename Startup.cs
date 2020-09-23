@@ -44,6 +44,7 @@ namespace DynamicData
             services.AddTransient<IDefaultField, DefaultFieldRepo>();
             services.AddTransient<IFieldValue, FieldValueRepo>();
             services.AddTransient<ICommon, CommonRepo>();
+            services.AddTransient<IUserRoles, UserRoleRepos>();
             //End 
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

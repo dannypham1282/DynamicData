@@ -48,7 +48,7 @@ namespace DynamicData.Repository
 
         public async Task<bool> Delete(int ID)
         {
-            var user = FindByID(ID);
+            var user = await FindByID(ID);
             _context.Remove(user);
             await _context.SaveChangesAsync();
             return true;
@@ -87,7 +87,7 @@ namespace DynamicData.Repository
 
         public async Task<List<User>> UserCollection()
         {
-            return await _context.User.ToListAsync();
+            return await _context.User.Include(i => i.UserRole).ThenInclude(i => i.Role).ToListAsync();
 
         }
 
@@ -98,6 +98,20 @@ namespace DynamicData.Repository
             return await _context.User.Include(i => i.UserOrganization).ThenInclude(i => i.Organization.ID == organizationID).ToListAsync();
         }
 
-
+        public async Task<bool> UpdatePassword(int userId, string password)
+        {
+            try
+            {
+                var user = await FindByID(userId);
+                user.Password = HashPassword.DoHash(password);
+                _context.User.Update(user);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }

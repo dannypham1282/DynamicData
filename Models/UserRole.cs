@@ -10,8 +10,10 @@ namespace DynamicData.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
         [AllowNull]
+        public int UserID { get; set; }
         public User User { get; set; }
         [AllowNull]
+        public int RoleID { get; set; }
         public Role Role { get; set; }
         public UserRole()
         {

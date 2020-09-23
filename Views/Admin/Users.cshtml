@@ -26,6 +26,36 @@
 
         </div>
     </div>
+
+    <div class="modal fade" id="modelUpdateUserPassword" aria-modal="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Password</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="divUpdatePassword">
+                    <div class="alert alert-danger alert-dismissible">
+
+                        this is dangerous
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Password</label>
+                        <input type="password" class="form-control" id="txtPassword" placeholder="Enter Password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="updatePassword()">Update Password</button>
+                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
 </div>
 @section scripts {
     <script>
@@ -78,7 +108,7 @@
                         url: editCellUrl,
                         success: function (res) {
                             $('#UserTable').DataTable().ajax.reload();
-                            toastr.success(res.result);
+                            toastr.success(res.message);
                         }
                     },
                 },
@@ -101,7 +131,7 @@
                   }, {
                       label: "Phone:",
                         name: "phone"
-                  }
+                      }
                   ]
               });
 
@@ -128,8 +158,8 @@
                                 dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-list\" ></i> Organization</a>";
                                 dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-user-tag\" ></i> Roles</a>";
                                 dropList += "<div class=\"dropdown-divider\"></div>";
-                                dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"updateUserPassword('" + data + "')\"><i class=\"fas fa-key\" ></i> Update Password</a>";
-                                dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" ><i class=\"fas fa-trash\" ></i> Delete</a>";
+                                dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showUpdatePasswordModal('" + data + "')\"><i class=\"fas fa-key\" ></i> Update Password</a>";
+                                dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" onclick=\"deleteUser(this)\"><i class=\"fas fa-trash\" ></i> Delete</a>";
                                 dropList +="</div>";
                                 return "<button type=\"button\" class=\"btn btn-outline-danger btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\" aria-expanded=\"true\"><i class=\"fa fa-sm fa-list\"></i> Action</button>" + dropList;
                             },
@@ -139,12 +169,15 @@
                         { title: "First Name",data: "firstname" },
                         { title: "LastName",data: "lastname" },
                         { title: "Email Address",data: "email" },
-                        { title: "Phone",data: "phone" },
+                        { title: "Phone", data: "phone" },
+                        {
+                            title: "Roles", "data": "userroles[, ].name", "autoWidth": true, className:"editdisable"
+                        }
 
                     ],
                 keys: {
                    // columns: ':not(:first-child):not(:nth-child(2))',
-                    columns: ':not(:first-child)',
+                    columns: ':not(:first-child):not(:nth-child(7))',
                     editor: editor
                 },
                 aaSorting: [[1,"asc"]],
@@ -237,18 +270,42 @@
             $(".buttons-excel").removeClass("dt-button buttons-excel").addClass("btn  btn-outline-success").html("<i class=\"fas fa-file-excel\"></i> <span>Excel</span>");
             $(".buttons-pdf").removeClass("dt-button buttons-pdf").addClass("btn  btn-outline-danger").html("<i class=\"fas fas fa-file-pdf\"></i> <span>PDF</span>");
 
-                $('#viewData').on('click', '.btn_removerow', function (e) {
-                    console.log(e);
-                    e.preventDefault();
-                    editor.remove($(this).closest('tr'), {
-                        title: 'Delete record',
-                        message: 'Are you sure you wish to remove this record?',
-                        buttons: 'Delete'
-                    });
-                });
         }
 
+        function deleteUser(ctr) {
+            console.log($(ctr).closest("tr"));
+            editor.remove($(ctr).closest("tr"), {
+                title: 'Delete record',
+                message: 'Are you sure you wish to remove this record?',
+                buttons: 'Delete'
+            });
+        }
 
+            var selectedUserId;
+            function showUpdatePasswordModal(userId) {
+                selectedUserId = userId;
+                $("#txtPassword").val("");
+                $(".alert").hide();
+                $("#modelUpdateUserPassword").modal("show");
+            }
+
+            function updatePassword() {
+                var password = $("#txtPassword").val();
+                if (password == "") {
+                    $(".alert").show().html("Please enter password");
+
+                }
+                else {
+                      $.getJSON("@Url.Action("UpdateUserPassword","Admin")", { userId: selectedUserId, password: password }, function (res) {
+                        if (res.status) {
+                           // $('#UserTable').DataTable().ajax.reload();
+                            $("#modelUpdateUserPassword").modal("hide");
+                            toastr.success(res.message);
+
+                        }
+                    });
+                }
+            }
 
     </script>
 }

@@ -13,9 +13,11 @@ namespace DynamicData.Controllers
     public class AdminController : Controller
     {
         private readonly IUser _iUser;
-        public AdminController(IUser iUser)
+        private readonly IUserRoles _iUserRoles;
+        public AdminController(IUser iUser, IUserRoles iUserRoles)
         {
             _iUser = iUser;
+            _iUserRoles = iUserRoles;
         }
         public IActionResult Index()
         {
@@ -35,7 +37,7 @@ namespace DynamicData.Controllers
             try
             {
                 List<User> userCollection = await _iUser.UserCollection();
-                return new JsonResult(new { data = userCollection.Select(s => new { s.ID, s.Username, s.Firstname, s.Lastname, s.Email, s.Phone }) });
+                return new JsonResult(new { data = userCollection.Select(s => new { s.ID, s.Username, s.Firstname, s.Lastname, s.Email, s.Phone, userroles = s.UserRole.Select(f => f.Role).ToList() }) });
             }
             catch (Exception ex)
             {
@@ -99,6 +101,54 @@ namespace DynamicData.Controllers
                 messsage = ex.Message;
             }
             return new JsonResult(new { status = status, message = messsage });
+        }
+
+        [HttpGet]
+        [Route("Admin/UpdateUserRoles")]
+        public async Task<IActionResult> UpdateUserRoles(int[] roleId, int userId)
+        {
+            bool status = false;
+            string messsage = "";
+            try
+            {
+                await _iUserRoles.Delete(userId);
+                if (roleId.Length > 0)
+                {
+                    foreach (int id in roleId)
+                    {
+
+                        await _iUserRoles.Add(new UserRole { RoleID = id, UserID = userId });
+                    }
+                    status = true;
+                    messsage = "User role has been updated";
+                }
+            }
+            catch (Exception ex)
+            {
+                status = false;
+                messsage = ex.Message;
+            }
+            return new JsonResult(new { status = status, messsage = messsage });
+        }
+
+        [HttpGet]
+        [Route("Admin/UpdateUserPassword")]
+        public async Task<IActionResult> UpdateUserPassword(int userId, string password)
+        {
+            bool status = false;
+            string message = "";
+            try
+            {
+                await _iUser.UpdatePassword(userId, password);
+                status = true;
+                message = "Password has been updated";
+            }
+            catch (Exception ex)
+            {
+                status = false;
+                message = ex.Message;
+            }
+            return new JsonResult(new { status = status, message = message });
         }
     }
 }

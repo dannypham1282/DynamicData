@@ -18,5 +18,7 @@ namespace DynamicData.Interface
 
         public Task<User> FindByID(int ID);
         public Task<User> FindByGUID(Guid Guid);
+
+        public Task<bool> UpdatePassword(int userId, string password);
     }
 }
