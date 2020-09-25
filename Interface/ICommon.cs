@@ -1,6 +1,7 @@
 ﻿using DynamicData.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DynamicData.Interface
 {
@@ -16,5 +17,7 @@ namespace DynamicData.Interface
         public bool SPNonQuery(string storeProcedure);
 
         public List<Dictionary<string, object>> ListStates();
+
+        public Task<List<Role>> RoleCollection();
     }
 }

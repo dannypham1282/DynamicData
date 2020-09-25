@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DynamicData.Repository
 {
@@ -117,6 +118,11 @@ namespace DynamicData.Repository
         public List<Dictionary<string, object>> ListStates()
         {
             return SPReader("spGetAllStates");
+        }
+
+        public async Task<List<Role>> RoleCollection()
+        {
+            return await _context.Role.ToListAsync();
         }
     }
 }

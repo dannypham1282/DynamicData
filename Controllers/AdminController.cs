@@ -14,18 +14,28 @@ namespace DynamicData.Controllers
     {
         private readonly IUser _iUser;
         private readonly IUserRoles _iUserRoles;
-        public AdminController(IUser iUser, IUserRoles iUserRoles)
+        private readonly ICommon _iCommon;
+        public AdminController(IUser iUser, IUserRoles iUserRoles, ICommon iCommon)
         {
             _iUser = iUser;
             _iUserRoles = iUserRoles;
+            _iCommon = iCommon;
         }
         public IActionResult Index()
         {
+
             return View();
         }
 
         public async Task<IActionResult> Users()
         {
+            ViewData["RoleCollection"] = await _iCommon.RoleCollection();
+            return View();
+        }
+
+        public async Task<IActionResult> Organizations()
+        {
+
             return View();
         }
 
@@ -50,7 +60,7 @@ namespace DynamicData.Controllers
         public async Task<IActionResult> UpdateUserCell()
         {
             bool status = false;
-            string messsage = "";
+            string message = "";
             try
             {
                 if (HttpContext.Request.Form["action"].ToString() == "create") //insert
@@ -67,7 +77,7 @@ namespace DynamicData.Controllers
                     }
                     await _iUser.Add(user);
                     status = true;
-                    messsage = "New User " + user.Firstname + " " + user.Lastname + "  has been added";
+                    message = "New User " + user.Firstname + " " + user.Lastname + "  has been added";
                 }
                 else if (HttpContext.Request.Form["action"].ToString() == "edit")//cell update
                 {
@@ -85,50 +95,58 @@ namespace DynamicData.Controllers
                         }
                     }
                     status = true;
-                    messsage = "Data has has been updated";
+                    message = "Data has has been updated";
                 }
                 else if (HttpContext.Request.Form["action"].ToString() == "remove")//remove)
                 {
                     string[] keys = Common.getUpdateKey(HttpContext.Request.Form.Keys.ToArray()[0]);
                     await _iUser.Delete(Convert.ToInt32(keys[0]));
                     status = true;
-                    messsage = "Record has beeen deleted.";
+                    message = "Record has beeen deleted.";
                 }
             }
             catch (Exception ex)
             {
                 status = false;
-                messsage = ex.Message;
+                message = ex.Message;
             }
-            return new JsonResult(new { status = status, message = messsage });
+            return new JsonResult(new { status = status, message = message });
         }
 
         [HttpGet]
         [Route("Admin/UpdateUserRoles")]
-        public async Task<IActionResult> UpdateUserRoles(int[] roleId, int userId)
+        public async Task<IActionResult> UpdateUserRoles(int userId, string roles)
         {
             bool status = false;
-            string messsage = "";
+            string message = "";
             try
             {
                 await _iUserRoles.Delete(userId);
-                if (roleId.Length > 0)
+                if (!string.IsNullOrEmpty(roles))
                 {
-                    foreach (int id in roleId)
+                    string[] roleId = roles.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    if (roleId.Length > 0)
                     {
-
-                        await _iUserRoles.Add(new UserRole { RoleID = id, UserID = userId });
+                        foreach (var id in roleId)
+                        {
+                            await _iUserRoles.Add(new UserRole { RoleID = Convert.ToInt16(id), UserID = userId });
+                        }
+                        status = true;
+                        message = "User role has been updated";
                     }
+                }
+                else
+                {
                     status = true;
-                    messsage = "User role has been updated";
+                    message = "User role has been updated";
                 }
             }
             catch (Exception ex)
             {
                 status = false;
-                messsage = ex.Message;
+                message = ex.Message;
             }
-            return new JsonResult(new { status = status, messsage = messsage });
+            return new JsonResult(new { status = status, message = message });
         }
 
         [HttpGet]

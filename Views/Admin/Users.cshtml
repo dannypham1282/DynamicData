@@ -1,4 +1,5 @@
 ﻿@model DynamicData.Models.User
+
 <div class="card card-default">
     <div class="card-header card-warning card-outline">
         <h3 class="card-title" id="viewCardTitle">
@@ -56,6 +57,40 @@
         <!-- /.modal-dialog -->
     </div>
 
+    <div class="modal fade" id="modelUpdateUserRole" aria-modal="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update User Roles</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="divUpdateUserRole">
+                    <div class="alert alert-danger alert-dismissible">
+                    </div>
+                    <div class="form-group">
+                        <h5>Roles</h5>
+                        <hr />
+                        <br />
+
+                        @foreach (var item in ViewData["RoleCollection"] as IEnumerable<DynamicData.Models.Role>)
+                        {
+            <input type="checkbox" value="@item.ID" name="cbRoles" id="cbRole" /> <label for="cbRole"> &nbsp;@item.Name</label> <br />}
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="updateUserRole()">Update User Role</button>
+                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+
 </div>
 @section scripts {
     <script>
@@ -63,7 +98,7 @@
             $.fn.dataTable.moment('MM/DD/YYYY');
             $.fn.dataTable.moment('D-MMM-YY');
             initialDataTable();
-
+         //  console.log(@ViewData["RoleCollection"]);
         });
 
         var editCellUrl = "@Url.Action("UpdateUserCell","Admin")";
@@ -151,12 +186,15 @@
                     columns: [
                         {
                             data: "id",
-
                             orderable: false,
-                            render: function (data) {
+                            render: function (data, type, row, meta) {
+                                var checkRoles = "";
+                                $.each(row.userroles, function (key, value) {
+                                    checkRoles += value.id + ",";
+                                });
                                 var dropList = "<div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
                                 dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-list\" ></i> Organization</a>";
-                                dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-user-tag\" ></i> Roles</a>";
+                                dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showUpdateUserRole('" + data + "','" + checkRoles + "')\" ><i class=\"fas fa-user-tag\" ></i> Roles</a>";
                                 dropList += "<div class=\"dropdown-divider\"></div>";
                                 dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showUpdatePasswordModal('" + data + "')\"><i class=\"fas fa-key\" ></i> Update Password</a>";
                                 dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" onclick=\"deleteUser(this)\"><i class=\"fas fa-trash\" ></i> Delete</a>";
@@ -289,6 +327,35 @@
                 $("#modelUpdateUserPassword").modal("show");
             }
 
+
+        function showUpdateUserRole(userId, userroles) {
+            selectedUserId = userId;
+            var roles = userroles.split(',').filter(function (e) { return e != ""; });;
+            console.log(roles)
+            $('[name="cbRoles"]').each(function () {
+                $(this).prop("checked", ($.inArray($(this).val(), roles) != -1));
+            });
+            $(".alert").hide();
+
+            $("#modelUpdateUserRole").modal("show");
+        }
+
+        function updateUserRole() {
+            var roles = $("#cbRole:checked").map(function () {
+                return this.value;
+            }).get().join(",");
+
+            $.getJSON("@Url.Action("UpdateUserRoles", "Admin")", { userId: selectedUserId, roles: roles }, function (res) {
+                if (res.status) {
+                    $('#UserTable').DataTable().ajax.reload();
+                    toastr.success(res.message);
+                }
+                else {
+                    toastr.error(res.message);
+                }
+            });
+        }
+
             function updatePassword() {
                 var password = $("#txtPassword").val();
                 if (password == "") {
@@ -301,7 +368,6 @@
                            // $('#UserTable').DataTable().ajax.reload();
                             $("#modelUpdateUserPassword").modal("hide");
                             toastr.success(res.message);
-
                         }
                     });
                 }
