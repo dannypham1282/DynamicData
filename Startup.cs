@@ -35,7 +35,7 @@ namespace DynamicData
             .UseSqlServer(Configuration.GetConnectionString("appConn")).EnableSensitiveDataLogging());
             //End
 
-            //add Interface and Repository
+            //Register Interface and Repository
             services.AddTransient<IUser, UserRepo>();
             services.AddTransient<ILibrary, LibraryRepo>();
             services.AddTransient<ILibraryType, LibraryTypeRepo>();
@@ -45,6 +45,7 @@ namespace DynamicData
             services.AddTransient<IFieldValue, FieldValueRepo>();
             services.AddTransient<ICommon, CommonRepo>();
             services.AddTransient<IUserRoles, UserRoleRepos>();
+            services.AddTransient<IOrganization, OrganizationRepo>();
             //End 
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();

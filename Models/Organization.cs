@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DynamicData.Models
@@ -13,13 +12,13 @@ namespace DynamicData.Models
         public string Name { get; set; }
         public string Address { get; set; }
         public string City { get; set; }
-        public string State { get; set; }
+        public int States { get; set; }
         public string Zip { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
         public string POC_FirstName { get; set; }
         public string POC_LastName { get; set; }
-        [NotMapped]
-        public List<User> UserCollection { get; set; }
+        public int? UserID { get; set; }
+
     }
 }

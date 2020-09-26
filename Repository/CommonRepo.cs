@@ -124,5 +124,7 @@ namespace DynamicData.Repository
         {
             return await _context.Role.ToListAsync();
         }
+
+
     }
 }

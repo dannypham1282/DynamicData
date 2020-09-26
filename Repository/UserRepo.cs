@@ -95,7 +95,8 @@ namespace DynamicData.Repository
 
         public async Task<List<User>> UserCollectionOrganization(int organizationID)
         {
-            return await _context.User.Include(i => i.UserOrganization).ThenInclude(i => i.Organization.ID == organizationID).ToListAsync();
+            //return await _context.User.Include(i => i.UserOrganization).ThenInclude(i => i.Organization.ID == organizationID).ToListAsync();
+            return null;
         }
 
         public async Task<bool> UpdatePassword(int userId, string password)
