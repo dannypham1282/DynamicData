@@ -12,9 +12,12 @@ namespace DynamicData.Repository
     public class UserRepo : IUser
     {
         private readonly DatabaseContext _context;
-        public UserRepo(DatabaseContext dbContext)
+        private readonly IUserRoles _iuserRoles;
+
+        public UserRepo(DatabaseContext dbContext, IUserRoles iUserRoles)
         {
             _context = dbContext;
+            _iuserRoles = iUserRoles;
         }
         public async Task<User> Add(User user)
         {
@@ -48,10 +51,18 @@ namespace DynamicData.Repository
 
         public async Task<bool> Delete(int ID)
         {
-            var user = await FindByID(ID);
-            _context.Remove(user);
-            await _context.SaveChangesAsync();
-            return true;
+            try
+            {
+                await _iuserRoles.Delete(ID);
+                var user = await FindByID(ID);
+                _context.Remove(user);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public void Dispose()
@@ -85,18 +96,14 @@ namespace DynamicData.Repository
 
         }
 
-        public async Task<List<User>> UserCollection()
+        public async Task<List<User>> UserCollection(bool isSysAdmin, int? orgId)
         {
-            return await _context.User.Include(i => i.UserRole).ThenInclude(i => i.Role).ToListAsync();
+            if (isSysAdmin)
+                return await _context.User.Include(i => i.UserRole).ThenInclude(i => i.Role).ToListAsync();
+            else
+                return await _context.User.Include(i => i.UserRole).ThenInclude(i => i.Role).Include(i => i.UserOrganization).ThenInclude(i => i.Organization).Where(w => w.UserOrganization.Any(a => a.OrganizationID == orgId)).ToListAsync();
 
-        }
 
-
-
-        public async Task<List<User>> UserCollectionOrganization(int organizationID)
-        {
-            //return await _context.User.Include(i => i.UserOrganization).ThenInclude(i => i.Organization.ID == organizationID).ToListAsync();
-            return null;
         }
 
         public async Task<bool> UpdatePassword(int userId, string password)

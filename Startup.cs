@@ -72,6 +72,7 @@ namespace DynamicData
                  o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                  o.SerializerSettings.DateFormatString = "mm/dd/yy, dddd";
              });
+            services.AddSession();
             services.AddControllersWithViews();
 
             //End
@@ -97,6 +98,8 @@ namespace DynamicData
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

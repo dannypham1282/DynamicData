@@ -13,6 +13,7 @@ namespace DynamicData.Models
         public User User { get; set; }
 
         public int OrganizationID { get; set; }
+
         public Organization Organization { get; set; }
 
     }

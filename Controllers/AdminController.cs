@@ -1,22 +1,23 @@
 ﻿using DynamicData.Interface;
 using DynamicData.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace DynamicData.Controllers
 {
-    [Authorize(Roles = "SYSADMIN")]
+    [Authorize(Roles = "SYSADMIN,ADMIN")]
     public class AdminController : Controller
     {
         private readonly IUser _iUser;
         private readonly IUserRoles _iUserRoles;
         private readonly ICommon _iCommon;
         private readonly IOrganization _iOrganization;
-        private object optionListStates;
 
         public AdminController(IUser iUser, IUserRoles iUserRoles, IOrganization iOrganization, ICommon iCommon)
         {
@@ -27,13 +28,14 @@ namespace DynamicData.Controllers
         }
         public IActionResult Index()
         {
-
             return View();
         }
 
-        public async Task<IActionResult> Users()
+        [HttpGet]
+        public async Task<IActionResult> Users(string guid)
         {
-            ViewData["RoleCollection"] = await _iCommon.RoleCollection();
+            HttpContext.Session.SetInt32("OrganizationID", Convert.ToInt32(guid));
+            ViewData["RoleCollection"] = await _iCommon.RoleCollection(HttpContext.User.IsInRole("SYSADMIN"));
             return View();
         }
 
@@ -79,7 +81,10 @@ namespace DynamicData.Controllers
         {
             try
             {
-                List<User> userCollection = await _iUser.UserCollection();
+                var orgId = HttpContext.User.FindFirstValue("OganizationId");
+                if (string.IsNullOrEmpty(orgId))
+                    orgId = HttpContext.Session.GetInt32("OrganizationID").ToString();
+                List<User> userCollection = await _iUser.UserCollection(HttpContext.User.IsInRole("SYSADMIN"), Convert.ToInt32(orgId));
                 return new JsonResult(new { data = userCollection.Select(s => new { s.ID, s.Username, s.Firstname, s.Lastname, s.Email, s.Phone, userroles = s.UserRole.Select(f => f.Role).ToList() }) });
             }
             catch (Exception ex)
@@ -108,7 +113,13 @@ namespace DynamicData.Controllers
                             Common.SetProperty(user, fieldName, keyValue);
                         }
                     }
-                    await _iUser.Add(user);
+                    await _iUser.Add(user);//Add User
+
+                    var orgId = HttpContext.User.FindFirstValue("OganizationId");//get organizationID from login claim 
+                    if (string.IsNullOrEmpty(orgId)) //If is is null then get it from session. This is when SysAdmin login so organizationID from login claim is null
+                        orgId = HttpContext.Session.GetInt32("OrganizationID").ToString();
+                    await _iOrganization.AddUserOrganization(user.ID, (Int32)Convert.ToInt32(orgId));
+
                     status = true;
                     message = "New User " + user.Firstname + " " + user.Lastname + "  has been added";
                 }

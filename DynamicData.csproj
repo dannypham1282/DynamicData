@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200927054047_userorganization.cs" />
+    <Compile Remove="Migrations\20200927054047_userorganization.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
    
     <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.7" />

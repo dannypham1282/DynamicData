@@ -18,6 +18,6 @@ namespace DynamicData.Interface
 
         public List<Dictionary<string, object>> ListStates();
 
-        public Task<List<Role>> RoleCollection();
+        public Task<List<Role>> RoleCollection(bool sysAdmin);
     }
 }

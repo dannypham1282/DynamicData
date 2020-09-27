@@ -18,13 +18,11 @@ namespace DynamicData.Repository
         public UserRoleRepos(DatabaseContext dbContext)
         {
             _context = dbContext;
-
         }
         public async Task<UserRole> Add(UserRole userRole)
         {
             try
             {
-
                 _context.UserRole.Add(userRole);
                 await _context.SaveChangesAsync();
                 return userRole;

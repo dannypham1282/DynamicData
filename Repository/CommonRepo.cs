@@ -1,6 +1,7 @@
 ﻿using DynamicData.Data;
 using DynamicData.Interface;
 using DynamicData.Models;
+
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -120,9 +121,12 @@ namespace DynamicData.Repository
             return SPReader("spGetAllStates");
         }
 
-        public async Task<List<Role>> RoleCollection()
+        public async Task<List<Role>> RoleCollection(bool sysAdmin)
         {
-            return await _context.Role.ToListAsync();
+            if (sysAdmin)
+                return await _context.Role.ToListAsync();
+            else
+                return await _context.Role.Where(w => w.Name != "SYSADMIN").ToListAsync();
         }
 
 

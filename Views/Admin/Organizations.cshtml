@@ -37,6 +37,7 @@
         });
 
         var editCellUrl = "@Url.Action("UpdateOrganizationCell", "Admin")";
+        var $statelist = GetAjaxNoParameters("@Url.Action("GetListStates", "Admin")").states;
         function initialDataTable() {
             $('#OranizationTable thead tr').empty();
               editor = new $.fn.dataTable.Editor({
@@ -101,7 +102,8 @@
                       label: "States:",
                           name: "states",
                           "type": "select",
-                          "options": GetAjaxNoParameters("@Url.Action("GetListStates", "Admin")").states,
+                          "options": $statelist,
+
                       },
                       {
                       label: "Zip:",
@@ -150,7 +152,7 @@
                                     checkRoles += value.id + ",";
                                 });
                                 var dropList = "<div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
-                                dropList += "<a class=\"dropdown-item\" href=\"@Url.Action("UserOrganization","Admin")\" ><i class=\"fas fa-list\" ></i> View Users</a>";
+                                dropList += "<a class=\"dropdown-item\" href=\"@Url.Action("Users", "Admin")/"+ data + "\" ><i class=\"fas fa-list\" ></i> View Users</a>";
                                 dropList += "<div class=\"dropdown-divider\"></div>";
                                 dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" onclick=\"deleteUser(this)\"><i class=\"fas fa-trash\" ></i> Delete</a>";
                                 dropList +="</div>";
@@ -161,7 +163,19 @@
                         { title:"Name",data: "name" },
                         { title: "Address",data: "address" },
                         { title: "City",data: "city" },
-                        { title: "State",data: "states" },
+                        {
+                            title: "State", data: "states",
+                            render: function (data, type, row, meta) {
+                                var state = "";
+                                $.each($statelist, function (key, value) {
+                                    if (value.value == data) {
+                                        state = value.label;
+                                        return false;
+                                    }
+                                });
+                                return state;
+                            }
+                        },
                         { title: "Zip", data: "zip" },
                         {
                             title: "Email", "data": "email"

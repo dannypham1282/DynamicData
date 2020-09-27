@@ -23,13 +23,13 @@ namespace DynamicData.Models
         public string Password { get; set; }
         public string Phone { get; set; }
 
-
+        public bool Active { get; set; }
         public List<Role> Roles { get; set; }
 
 
         public List<UserRole> UserRole { get; set; }
-        public List<UserOrganization> UserOrganization { get; set; }
         public List<Organization> Organization { get; set; }
+        public List<UserOrganization> UserOrganization { get; set; }
 
         public User()
         {

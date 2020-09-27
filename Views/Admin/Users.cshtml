@@ -48,7 +48,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-primary" onclick="updatePassword()">Update Password</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="updatePassword()">Set Password</button>
                     <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -298,7 +298,7 @@
                 "initComplete": function (settings, json) {
 
                 },
-                ajax: '@Url.Action("LoadUsersData", "Admin")',
+                    ajax: '@Url.Action("LoadUsersData", "Admin")',
             });
 
 

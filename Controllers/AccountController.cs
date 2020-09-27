@@ -37,7 +37,9 @@ namespace DynamicData.Controllers
                 var user = _context.User
                     .Include(u => u.UserRole)
                     .ThenInclude(r => r.Role)
-                  .Where(w => w.Username == login.Username && w.Password.Trim() == login.Password).FirstOrDefault();
+                    .Include(i => i.UserOrganization)
+                    .ThenInclude(o => o.Organization)
+                  .Where(w => w.Username == login.Username && w.Password.Trim() == login.Password && w.Active == true).FirstOrDefault();
                 if (user == null)
                 {
                     ViewData["loginMessage"] = "Invalid Username or Password";
@@ -54,11 +56,14 @@ namespace DynamicData.Controllers
                         identity.AddClaim(new Claim(ClaimTypes.Email, user.Email));
                         identity.AddClaim(new Claim(ClaimTypes.Sid, user.ID.ToString()));
                         identity.AddClaim(new Claim("GUID", user.GUID.ToString()));
-                        //if (user.Organization != null)
-                        //{
-                        //    identity.AddClaim(new Claim("OganizationId", user.Organization.ID.ToString()));
-                        //    identity.AddClaim(new Claim("Oganization", user.Organization.Name));
-                        //}
+                        if (user.UserOrganization != null)
+                        {
+                            foreach (var org in user.UserOrganization)
+                            {
+                                identity.AddClaim(new Claim("OganizationId", org.OrganizationID.ToString()));
+                                identity.AddClaim(new Claim("Oganization", org.Organization.Name));
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {

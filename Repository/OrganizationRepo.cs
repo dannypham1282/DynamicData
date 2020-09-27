@@ -29,8 +29,8 @@ namespace DynamicData.Repository
             try
             {
                 UserOrganization userOrganization = new UserOrganization();
-                userOrganization.User.ID = userId;
-                userOrganization.Organization.ID = orgId;
+                userOrganization.UserID = userId;
+                userOrganization.OrganizationID = orgId;
                 _context.UserOrganization.Add(userOrganization);
                 await _context.SaveChangesAsync();
                 return true;
