@@ -152,7 +152,9 @@
                                     checkRoles += value.id + ",";
                                 });
                                 var dropList = "<div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
-                                dropList += "<a class=\"dropdown-item\" href=\"@Url.Action("Users", "Admin")/"+ data + "\" ><i class=\"fas fa-list\" ></i> View Users</a>";
+                                dropList += "<a class=\"dropdown-item\" href=\"@Url.Action("Users", "Admin")/" + data + "\" ><i class=\"fas fa-list\" ></i> View Users</a>";
+                                dropList += "<div class=\"dropdown-divider\"></div>";
+                                dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" onclick=\"updateDefaultLibrary(('" + data + "')\"><i class=\"fas fa-list\" ></i> Default Library</a>";
                                 dropList += "<div class=\"dropdown-divider\"></div>";
                                 dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" onclick=\"deleteUser(this)\"><i class=\"fas fa-trash\" ></i> Delete</a>";
                                 dropList +="</div>";

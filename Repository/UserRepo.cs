@@ -99,7 +99,7 @@ namespace DynamicData.Repository
         public async Task<List<User>> UserCollection(bool isSysAdmin, int? orgId)
         {
             if (isSysAdmin)
-                return await _context.User.Include(i => i.UserRole).ThenInclude(i => i.Role).ToListAsync();
+                return await _context.User.Include(i => i.UserRole).ThenInclude(i => i.Role).Include(i => i.UserOrganization).ThenInclude(i => i.Organization).ToListAsync();
             else
                 return await _context.User.Include(i => i.UserRole).ThenInclude(i => i.Role).Include(i => i.UserOrganization).ThenInclude(i => i.Organization).Where(w => w.UserOrganization.Any(a => a.OrganizationID == orgId)).ToListAsync();
 

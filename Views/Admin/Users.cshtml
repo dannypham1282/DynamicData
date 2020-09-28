@@ -6,6 +6,7 @@
             Users
         </h3>
         <div class="card-tools">
+            <h5>@User.FindFirst("Oganization")</h5>
             @*<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                     <i class="fas fa-minus"></i>
                 </button>
@@ -90,7 +91,41 @@
         <!-- /.modal-dialog -->
     </div>
 
+    @if (User.IsInRole("SYSADMIN"))
+    {
+<div class="modal fade" id="modelUpdateUserOrganization" aria-modal="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update User Organization</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="divUpdateUserOrganization">
+                <div class="alert alert-danger alert-dismissible">
+                </div>
+                <div class="form-group">
+                    <h5>Organization</h5>
+                    <hr />
+                    <br />
+                    @if (User.IsInRole("SYSADMIN"))
+                    {
+    @foreach (var item in ViewData["OrganizationCollection"] as IEnumerable<DynamicData.Models.Organization>)
+    {
+<input type="checkbox" value="@item.ID" name="cbOrganization" id="cbOrganization" /> <label for="cbOrganization"> &nbsp;@item.Name</label> <br />}}
 
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" onclick="updateUserOrganization()">Update User Organization</button>
+                <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>}
 </div>
 @section scripts {
     <script>
@@ -174,14 +209,15 @@
                 UserTable = $('#UserTable').DataTable({
                 //fixedHeader: true,
                 scrollY:650,
-                //colReorder: colReorder,
-                //"ordering": isSorted,
                 "ordering": true,
-                //stateSave: true,
                 "aLengthMenu": [[25, 50, 100, -1], [ 25, 50, 100, "All"]],
                 "language": {
                     "emptyTable": "No data available in table"
-                },
+                    },
+
+                    rowGroup: {
+                        dataSrc: "userOrganization[, ].name",
+                    },
                 dom: "Blfrtip",
                     columns: [
                         {
@@ -189,18 +225,30 @@
                             orderable: false,
                             render: function (data, type, row, meta) {
                                 var checkRoles = "";
+
                                 $.each(row.userroles, function (key, value) {
                                     checkRoles += value.id + ",";
                                 });
                                 var dropList = "<div class=\"dropdown-menu dropdown-menu-right\" role=\"menu\">";
-                                dropList += "<a class=\"dropdown-item\" href=\"#\" ><i class=\"fas fa-list\" ></i> Organization</a>";
-                                dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showUpdateUserRole('" + data + "','" + checkRoles + "')\" ><i class=\"fas fa-user-tag\" ></i> Roles</a>";
-                                dropList += "<div class=\"dropdown-divider\"></div>";
-                                dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showUpdatePasswordModal('" + data + "')\"><i class=\"fas fa-key\" ></i> Update Password</a>";
-                                dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" onclick=\"deleteUser(this)\"><i class=\"fas fa-trash\" ></i> Delete</a>";
-                                dropList +="</div>";
-                                return "<button type=\"button\" class=\"btn btn-outline-danger btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\" aria-expanded=\"true\"><i class=\"fa fa-sm fa-list\"></i> Action</button>" + dropList;
-                            },
+                                @if (User.IsInRole("SYSADMIN"))
+            {
+                                    <text>
+                                var checkOrganization = "";
+                                $.each(row.userOrganization, function (key, value) {
+
+                                    checkOrganization += value.id + ",";
+                                });
+                                dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showUpdateUserOrganization('" + data + "','" + checkOrganization + "')\"><i class=\"fas fa-list\"></i> Organization</a>";
+
+                                </text>
+                                }
+                                    dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showUpdateUserRole('" + data + "','" + checkRoles + "')\" ><i class=\"fas fa-user-tag\" ></i> Roles</a>";
+                                    dropList += "<div class=\"dropdown-divider\"></div>";
+                                    dropList += "<a class=\"dropdown-item\" href=\"#\" onclick=\"showUpdatePasswordModal('" + data + "')\"><i class=\"fas fa-key\" ></i> Update Password</a>";
+                                    dropList += "<a class=\"dropdown-item btn_removerow\" href=\"#\" onclick=\"deleteUser(this)\"><i class=\"fas fa-trash\" ></i> Delete</a>";
+                                    dropList +="</div>";
+                                    return "<button type=\"button\" class=\"btn btn-outline-danger btn-sm dropdown-toggle dropdown-hover\" data-toggle=\"dropdown\" aria-expanded=\"true\"><i class=\"fa fa-sm fa-list\"></i> Action</button>" + dropList;
+                                },
                             width:70
                         },
                         { title:"UserName",data: "username" },
@@ -211,11 +259,15 @@
                         {
                             title: "Roles", "data": "userroles[, ].name", "autoWidth": true, className:"editdisable"
                         }
+                        ,
+                        {
+                            title: "Organization", "data": "userOrganization[, ].name", "autoWidth": true, className: "editdisable"
+                        }
 
                     ],
                 keys: {
                    // columns: ':not(:first-child):not(:nth-child(2))',
-                    columns: ':not(:first-child):not(:nth-child(7))',
+                    columns: ':not(:first-child):not(:nth-child(7)):not(:nth-child(8))',
                     editor: editor
                 },
                 aaSorting: [[1,"asc"]],
@@ -330,14 +382,24 @@
 
         function showUpdateUserRole(userId, userroles) {
             selectedUserId = userId;
-            var roles = userroles.split(',').filter(function (e) { return e != ""; });;
-            console.log(roles)
+            var roles = userroles.split(',').filter(function (e) { return e != ""; });
             $('[name="cbRoles"]').each(function () {
                 $(this).prop("checked", ($.inArray($(this).val(), roles) != -1));
             });
             $(".alert").hide();
 
             $("#modelUpdateUserRole").modal("show");
+        }
+
+        function showUpdateUserOrganization(userId, userOrgainzation) {
+            selectedUserId = userId;
+            var orgs = userOrgainzation.split(',').filter(function (e) { return e != ""; });
+            $('[name="cbOrganization"]').each(function () {
+                $(this).prop("checked", ($.inArray($(this).val(), orgs) != -1));
+            });
+            $(".alert").hide();
+
+            $("#modelUpdateUserOrganization").modal("show");
         }
 
         function updateUserRole() {
@@ -356,6 +418,23 @@
             });
         }
 
+        function updateUserOrganization() {
+            var orgs = $("#cbOrganization:checked").map(function () {
+                return this.value;
+            }).get().join(",");
+
+            $.getJSON("@Url.Action("UpdateUserOrganization", "Admin")", { userId: selectedUserId, orgs: orgs }, function (res) {
+                if (res.status) {
+                    $('#UserTable').DataTable().ajax.reload();
+                    toastr.success(res.message);
+                }
+                else {
+                    toastr.error(res.message);
+                }
+            });
+
+        }
+
             function updatePassword() {
                 var password = $("#txtPassword").val();
                 if (password == "") {
@@ -372,6 +451,7 @@
                     });
                 }
             }
+
 
     </script>
 }

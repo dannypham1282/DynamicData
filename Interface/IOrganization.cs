@@ -22,5 +22,8 @@ namespace DynamicData.Interface
 
         public Task<bool> DeleteOrganizationFromUser(int orgId);
 
+        public Task<bool> DeleteOrganizationLibrary(int orgId);
+        public Task<bool> AddOrganizationLibrary(int orgId, int libraryId);
+
     }
 }

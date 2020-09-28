@@ -24,6 +24,24 @@ namespace DynamicData.Repository
             return organization;
         }
 
+        public async Task<bool> AddOrganizationLibrary(int orgId, int libraryId)
+        {
+            try
+            {
+                OrganizationLibrary organizationLibrary = new OrganizationLibrary();
+                organizationLibrary.OrganizationID = orgId;
+                organizationLibrary.LibraryID = libraryId;
+                _context.OrganizationLibrary.Add(organizationLibrary);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+        }
+
         public async Task<bool> AddUserOrganization(int userId, int orgId)
         {
             try
@@ -62,6 +80,21 @@ namespace DynamicData.Repository
             {
                 var userOrganization = await _context.UserOrganization.Where(w => w.Organization.ID == orgId).ToListAsync();
                 _context.UserOrganization.RemoveRange(userOrganization);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteOrganizationLibrary(int orgId)
+        {
+            try
+            {
+                var organizationLibrary = await _context.OrganizationLibrary.Where(w => w.OrganizationID == orgId).ToListAsync();
+                _context.OrganizationLibrary.RemoveRange(organizationLibrary);
                 await _context.SaveChangesAsync();
                 return true;
             }

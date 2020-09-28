@@ -35,6 +35,8 @@ namespace DynamicData.Controllers
         public async Task<IActionResult> Users(string guid)
         {
             HttpContext.Session.SetInt32("OrganizationID", Convert.ToInt32(guid));
+            if (HttpContext.User.IsInRole("SYSADMIN"))
+                ViewData["OrganizationCollection"] = await _iOrganization.OrganizationCollection();
             ViewData["RoleCollection"] = await _iCommon.RoleCollection(HttpContext.User.IsInRole("SYSADMIN"));
             return View();
         }
@@ -85,7 +87,22 @@ namespace DynamicData.Controllers
                 if (string.IsNullOrEmpty(orgId))
                     orgId = HttpContext.Session.GetInt32("OrganizationID").ToString();
                 List<User> userCollection = await _iUser.UserCollection(HttpContext.User.IsInRole("SYSADMIN"), Convert.ToInt32(orgId));
-                return new JsonResult(new { data = userCollection.Select(s => new { s.ID, s.Username, s.Firstname, s.Lastname, s.Email, s.Phone, userroles = s.UserRole.Select(f => f.Role).ToList() }) });
+                return new JsonResult(new
+                {
+                    data = userCollection
+                    .Select(s => new
+                    {
+                        s.ID,
+                        s.Username,
+                        s.Firstname,
+                        s.Lastname,
+                        s.Email,
+                        s.Phone,
+                        userroles = s.UserRole
+                        .Select(f => f.Role).ToList(),
+                        userOrganization = s.UserOrganization.Select(o => new { o.Organization.Name, o.Organization.ID }).ToList()
+                    })
+                });
             }
             catch (Exception ex)
             {
@@ -192,6 +209,43 @@ namespace DynamicData.Controllers
             }
             return new JsonResult(new { status = status, message = message });
         }
+
+        [HttpGet]
+        [Route("Admin/UpdateUserOrganization")]
+        public async Task<IActionResult> UpdateUserOrganization(int userId, string orgs)
+        {
+            bool status = false;
+            string message = "";
+            try
+            {
+                await _iOrganization.DeleteUserFromOrganization(userId);
+                if (!string.IsNullOrEmpty(orgs))
+                {
+                    string[] orgId = orgs.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    if (orgId.Length > 0)
+                    {
+                        foreach (var id in orgId)
+                        {
+                            await _iOrganization.AddUserOrganization(userId, Convert.ToInt32(id));
+                        }
+                        status = true;
+                        message = "User Organization has been updated";
+                    }
+                }
+                else
+                {
+                    status = true;
+                    message = "User Organization has been updated";
+                }
+            }
+            catch (Exception ex)
+            {
+                status = false;
+                message = ex.Message;
+            }
+            return new JsonResult(new { status = status, message = message });
+        }
+
 
         [HttpGet]
         [Route("Admin/UpdateUserPassword")]

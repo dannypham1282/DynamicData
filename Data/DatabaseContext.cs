@@ -33,6 +33,7 @@ namespace DynamicData.Data
         public DbSet<DefaultField> DefaultField { get; set; }
         public DbSet<Organization> Organization { get; set; }
         public DbSet<UserOrganization> UserOrganization { get; set; }
+        public DbSet<OrganizationLibrary> OrganizationLibrary { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
