@@ -115,7 +115,7 @@ namespace DynamicData.Controllers
                             var user = _iUser.FindByID(Convert.ToInt32(HttpContext.User.FindFirstValue(ClaimTypes.Sid))).Result;
                             var libraryType = await _iLibraryType.FindByID((int)library.LibraryTypeID);
                             string testid = HttpContext.User.FindFirst("GUID").ToString();
-                            library.CreatedBy = user;
+                            library.CreatedByID = user.ID;
                             library.CreatedDate = DateTime.Now;
                             if (libraryType.Type.ToLower() == "dataview")// 1:Container,2:Data View. If library has type = 2 then create some default fields for the Data view library
                             {
@@ -142,7 +142,10 @@ namespace DynamicData.Controllers
                                     await _iField.Add(field);
                                 }
                             }
-                            await Task.FromResult(_iLibrary.Add(library));
+                            else
+                            {
+                                await _iLibrary.Add(library);
+                            }                         
                             status = true;
                             message = "Library " + library.Title + " has been added!";
                         }
@@ -156,7 +159,7 @@ namespace DynamicData.Controllers
                     {
                         if (!await _iLibrary.CheckDuplicate(library))
                         {
-                            library.EditedBy = _iUser.FindByID(Convert.ToInt32(HttpContext.User.FindFirstValue(ClaimTypes.Sid))).Result;
+                            library.EditedByID = _iUser.FindByID(Convert.ToInt32(HttpContext.User.FindFirstValue(ClaimTypes.Sid))).Result.ID;
                             library.EditedDate = DateTime.Now;
                             await _iLibrary.Edit(library);
 

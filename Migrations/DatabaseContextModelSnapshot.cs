@@ -501,6 +501,28 @@ namespace DynamicData.Migrations
                     b.ToTable("Organization");
                 });
 
+            modelBuilder.Entity("DynamicData.Models.OrganizationLibrary", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("LibraryID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrganizationID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("LibraryID");
+
+                    b.HasIndex("OrganizationID");
+
+                    b.ToTable("OrganizationLibrary");
+                });
+
             modelBuilder.Entity("DynamicData.Models.Permission", b =>
                 {
                     b.Property<int>("ID")
@@ -761,6 +783,21 @@ namespace DynamicData.Migrations
                     b.HasOne("DynamicData.Models.User", null)
                         .WithMany("Organization")
                         .HasForeignKey("UserID");
+                });
+
+            modelBuilder.Entity("DynamicData.Models.OrganizationLibrary", b =>
+                {
+                    b.HasOne("DynamicData.Models.Library", "Library")
+                        .WithMany()
+                        .HasForeignKey("LibraryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DynamicData.Models.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DynamicData.Models.Role", b =>

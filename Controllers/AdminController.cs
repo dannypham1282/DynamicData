@@ -18,13 +18,17 @@ namespace DynamicData.Controllers
         private readonly IUserRoles _iUserRoles;
         private readonly ICommon _iCommon;
         private readonly IOrganization _iOrganization;
+        private readonly ILibrary _iLibrary;
+        private readonly ILibraryType _iLibraryType;
 
-        public AdminController(IUser iUser, IUserRoles iUserRoles, IOrganization iOrganization, ICommon iCommon)
+        public AdminController(IUser iUser, IUserRoles iUserRoles, IOrganization iOrganization, ICommon iCommon, ILibrary iLibrary, ILibraryType iLibraryType)
         {
             _iUser = iUser;
             _iUserRoles = iUserRoles;
             _iOrganization = iOrganization;
             _iCommon = iCommon;
+            _iLibrary = iLibrary;
+            _iLibraryType = iLibraryType;
         }
         public IActionResult Index()
         {
@@ -308,7 +312,26 @@ namespace DynamicData.Controllers
                                 Common.SetProperty(organization, fieldName, keyValue);
                         }
                     }
+
                     await _iOrganization.Add(organization);
+
+                    //Add new library to the left side menu when a new Organization is adding to the system
+                    var library = new Library();
+                    // Find Root Library
+                    var rootLibrary = _iLibrary.FindByName("Root");
+                    // Find Library Type
+                    var libraryType = await _iLibraryType.FindByName("Container");
+                    // Set value for Library
+                    library.Name = organization.Name;
+                    library.ParentID = rootLibrary.Id;
+                    library.Title = organization.Name;
+                    library.MenuType = "Side Menu";
+                    library.LibraryTypeID = libraryType.ID;
+                    library.Visible = 1;
+                    //add Library to database
+                    await _iLibrary.Add(library);
+                    //add Organization library to Oranization Library table
+                    await _iOrganization.AddOrganizationLibrary(organization.ID, library.ID);
                     status = true;
                     message = "New Organization " + organization.Name + "  has been added";
                 }

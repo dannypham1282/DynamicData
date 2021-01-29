@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DynamicData.Migrations
 {
-    public partial class db : Migration
+    public partial class dynamictables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -400,6 +400,32 @@ namespace DynamicData.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OrganizationLibrary",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrganizationID = table.Column<int>(nullable: false),
+                    LibraryID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrganizationLibrary", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_OrganizationLibrary_Library_LibraryID",
+                        column: x => x.LibraryID,
+                        principalTable: "Library",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrganizationLibrary_Organization_OrganizationID",
+                        column: x => x.OrganizationID,
+                        principalTable: "Organization",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserOrganization",
                 columns: table => new
                 {
@@ -624,6 +650,16 @@ namespace DynamicData.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_OrganizationLibrary_LibraryID",
+                table: "OrganizationLibrary",
+                column: "LibraryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrganizationLibrary_OrganizationID",
+                table: "OrganizationLibrary",
+                column: "OrganizationID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Role_UserID",
                 table: "Role",
                 column: "UserID");
@@ -679,6 +715,9 @@ namespace DynamicData.Migrations
 
             migrationBuilder.DropTable(
                 name: "LinkLibrary");
+
+            migrationBuilder.DropTable(
+                name: "OrganizationLibrary");
 
             migrationBuilder.DropTable(
                 name: "UserOrganization");

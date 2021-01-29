@@ -66,13 +66,18 @@ namespace DynamicData.Repository
         public async Task<LibraryType> FindByID(int ID)
         {
             return await _context.LibraryType.Where(w => w.ID == ID).FirstOrDefaultAsync();
-            throw new NotImplementedException();
+
         }
 
         public async Task<List<LibraryType>> LibraryTypeCollection()
         {
             return await _context.LibraryType.ToListAsync();
-            throw new NotImplementedException();
+
+        }
+
+        public async Task<LibraryType> FindByName(string name)
+        {
+            return await _context.LibraryType.Where(w => w.Type.ToLower() == name.ToLower().Trim()).AsNoTracking().FirstOrDefaultAsync();
         }
 
     }

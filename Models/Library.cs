@@ -55,11 +55,9 @@ namespace DynamicData.Models
         [AllowNull]
         public List<Library> LibraryCollection { get; set; }
 
-        [AllowNull]
-        public User CreatedBy { get; set; }
+        public int? CreatedByID { get; set; }
 
-        [AllowNull]
-        public User EditedBy { get; set; }
+        public int? EditedByID { get; set; }
         public int? Deleted { get; set; }
 
         public int? Visible { get; set; }

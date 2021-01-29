@@ -23,7 +23,7 @@ namespace DynamicData.Repository
         {
             try
             {
-                await _context.AddAsync(library);
+                await _context.Library.AddAsync(library);
                 await _context.SaveChangesAsync();
                 return library;
             }
@@ -121,7 +121,7 @@ namespace DynamicData.Repository
 
             try
             {
-                return await _context.Library.Where(w => w.Name == Name.Trim()).FirstOrDefaultAsync();
+                return await _context.Library.Where(w => w.Name.ToLower() == Name.Trim().ToLower()).FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {

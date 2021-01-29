@@ -11,6 +11,7 @@ namespace DynamicData.Interface
 
         public Task<LibraryType> FindByGUID(Guid Guid);
         public Task<LibraryType> FindByID(int ID);
+        public Task<LibraryType> FindByName(string name);
 
         public Task<LibraryType> Add(LibraryType libraryType);
         public Task<bool> Delete(Guid Guid);
