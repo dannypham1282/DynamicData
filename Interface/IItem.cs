@@ -9,6 +9,8 @@ namespace DynamicData.Interface
     {
         public Task<List<Item>> ItemCollection();
 
+        public Task<List<Item>> ItemCollection(Guid libraryGuid);
+
         public Task<Item> Add(Item item);
 
         public Task<Item> Delete(Guid Guid);

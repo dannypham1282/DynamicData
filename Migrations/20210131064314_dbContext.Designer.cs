@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DynamicData.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20201007135848_dynamictables")]
-    partial class dynamictables
+    [Migration("20210131064314_dbContext")]
+    partial class dbContext
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -250,6 +250,21 @@ namespace DynamicData.Migrations
                     b.ToTable("FieldValue");
                 });
 
+            modelBuilder.Entity("DynamicData.Models.FormularDefinition", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Formular")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("FormularDefinition");
+                });
+
             modelBuilder.Entity("DynamicData.Models.Item", b =>
                 {
                     b.Property<int>("ID")
@@ -388,10 +403,6 @@ namespace DynamicData.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("CreatedByID");
-
-                    b.HasIndex("EditedByID");
 
                     b.HasIndex("LibraryTypeID");
 
@@ -756,14 +767,6 @@ namespace DynamicData.Migrations
 
             modelBuilder.Entity("DynamicData.Models.Library", b =>
                 {
-                    b.HasOne("DynamicData.Models.User", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedByID");
-
-                    b.HasOne("DynamicData.Models.User", "EditedBy")
-                        .WithMany()
-                        .HasForeignKey("EditedByID");
-
                     b.HasOne("DynamicData.Models.LibraryType", "LibraryType")
                         .WithMany()
                         .HasForeignKey("LibraryTypeID");

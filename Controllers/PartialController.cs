@@ -11,17 +11,19 @@ namespace DynamicData.Controllers
     {
         private readonly IUser _iUser;
         private readonly IField _iField;
+        private readonly IItem _iItem;
         private readonly IFieldValue _iFieldValue;
         private readonly ILibrary _iLibrary;
         private readonly ICommon _iCommon;
 
-        public PartialController(IUser iUser, IField iField, IFieldValue iFieldValue, ILibrary iLibrary, ICommon iCommon)
+        public PartialController(IUser iUser, IField iField, IFieldValue iFieldValue, ILibrary iLibrary, ICommon iCommon,IItem iItem)
         {
             _iUser = iUser;
             _iField = iField;
             _iFieldValue = iFieldValue;
             _iLibrary = iLibrary;
             _iCommon = iCommon;
+            _iItem = iItem;
         }
 
         public IActionResult Index()
@@ -96,31 +98,51 @@ namespace DynamicData.Controllers
                         {
                             field.LibraryGuid = libraryGuid;
                             field.GUID = Guid.NewGuid();
-                            field.Visible = (field.IsVisible) ? 1 : 0;
-                            field.Editable = (field.IsEditable) ? 1 : 0;
+                            field.Visible = (field.IsVisible) ? 1 : 0;                         
                             field.Required = (field.IsRequired) ? 1 : 0;
                             field.Grouping = (field.IsGrouping) ? 1 : 0;
                             field.DefaultSort = (field.IsDefaultSort) ? 1 : 0;
                             field.CheckDubplicate = (field.IsCheckDuplicate) ? 1 : 0;
                             field.SortOrder = 100;
                             field.Deleted = 0;
-                            await _iField.Add(field);
+                            if (field.FormularView == "" || field.FormularView == null)
+                            {
+                                field.Editable = (field.IsEditable) ? 1 : 0;
+                            }
+                            else
+                                field.Editable = 0;
+
+                           await _iField.Add(field);
                             status = true;
                             message = field.Title + " has been added to Library.";
                         }
                         else // update field
                         {
                             field.LibraryGuid = libraryGuid;
-                            field.Visible = (field.IsVisible) ? 1 : 0;
-                            field.Editable = (field.IsEditable) ? 1 : 0;
+                            field.Visible = (field.IsVisible) ? 1 : 0;                           
                             field.Required = (field.IsRequired) ? 1 : 0;
                             field.Grouping = (field.IsGrouping) ? 1 : 0;
                             field.DefaultSort = (field.IsDefaultSort) ? 1 : 0;
                             field.CheckDubplicate = (field.IsCheckDuplicate) ? 1 : 0;
                             field.Deleted = 0;
+                            if (field.FormularView == "" || field.FormularView == null)
+                            {
+                                field.Editable = (field.IsEditable) ? 1 : 0;
+                            }
+                            else
+                                field.Editable = 0;
                             await _iField.Update(field);
                             status = true;
                             message = field.Title + " has been updated.";
+                        }
+                        // Update Calculate Field value when new Calculate Field is added
+                        if (field.FormularView !="")
+                        {
+                            List<Item> libraryItems = await _iItem.ItemCollection(libraryGuid);
+                           foreach (Item item in libraryItems)
+                            {
+                                await _iFieldValue.CalculateFormularField(item.ID, libraryGuid, field.GUID);
+                            }
                         }
                         status = true;
                     }

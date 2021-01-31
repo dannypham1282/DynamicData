@@ -31,6 +31,8 @@ namespace DynamicData.Interface
 
         public Task<Field> EmptyFieldForView();
 
+        public Task<FormularDefinition> FormularDefinition();
+
 
     }
 }

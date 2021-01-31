@@ -159,5 +159,9 @@ namespace DynamicData.Repository
             return field;
         }
 
+        public Task<FormularDefinition> FormularDefinition()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

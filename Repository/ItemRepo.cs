@@ -61,6 +61,11 @@ namespace DynamicData.Repository
             return await _context.Item.ToListAsync();
         }
 
+        public async Task<List<Item>> ItemCollection(Guid libraryGuid)
+        {
+            return await _context.Item.Where(w => w.LibraryGuid == libraryGuid).ToListAsync();
+        }
+
         public async Task<Item> Update(Item item)
         {
             _context.Item.Update(item);

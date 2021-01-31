@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DynamicData.Migrations
 {
-    public partial class dynamictables : Migration
+    public partial class dbContext : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -18,6 +18,19 @@ namespace DynamicData.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FieldType", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FormularDefinition",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Formular = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FormularDefinition", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -142,6 +155,41 @@ namespace DynamicData.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Library",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    GUID = table.Column<Guid>(nullable: false),
+                    Name = table.Column<string>(maxLength: 500, nullable: true),
+                    Title = table.Column<string>(maxLength: 1000, nullable: true),
+                    Description = table.Column<string>(type: "varchar(MAX)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(nullable: true),
+                    EditedDate = table.Column<DateTime>(nullable: true),
+                    GroupBy = table.Column<string>(nullable: true),
+                    OrderBy = table.Column<string>(nullable: true),
+                    LibraryTypeID = table.Column<int>(nullable: true),
+                    ParentID = table.Column<int>(nullable: true),
+                    CreatedByID = table.Column<int>(nullable: true),
+                    EditedByID = table.Column<int>(nullable: true),
+                    Deleted = table.Column<int>(nullable: true),
+                    Visible = table.Column<int>(nullable: true),
+                    URL = table.Column<string>(nullable: true),
+                    MenuType = table.Column<string>(nullable: true),
+                    SortOrder = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Library", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Library_LibraryType_LibraryTypeID",
+                        column: x => x.LibraryTypeID,
+                        principalTable: "LibraryType",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SecurityGroup",
                 columns: table => new
                 {
@@ -190,53 +238,6 @@ namespace DynamicData.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Library",
-                columns: table => new
-                {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    GUID = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(maxLength: 500, nullable: true),
-                    Title = table.Column<string>(maxLength: 1000, nullable: true),
-                    Description = table.Column<string>(type: "varchar(MAX)", nullable: true),
-                    CreatedDate = table.Column<DateTime>(nullable: true),
-                    EditedDate = table.Column<DateTime>(nullable: true),
-                    GroupBy = table.Column<string>(nullable: true),
-                    OrderBy = table.Column<string>(nullable: true),
-                    LibraryTypeID = table.Column<int>(nullable: true),
-                    ParentID = table.Column<int>(nullable: true),
-                    CreatedByID = table.Column<int>(nullable: true),
-                    EditedByID = table.Column<int>(nullable: true),
-                    Deleted = table.Column<int>(nullable: true),
-                    Visible = table.Column<int>(nullable: true),
-                    URL = table.Column<string>(nullable: true),
-                    MenuType = table.Column<string>(nullable: true),
-                    SortOrder = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Library", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Library_User_CreatedByID",
-                        column: x => x.CreatedByID,
-                        principalTable: "User",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Library_User_EditedByID",
-                        column: x => x.EditedByID,
-                        principalTable: "User",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Library_LibraryType_LibraryTypeID",
-                        column: x => x.LibraryTypeID,
-                        principalTable: "LibraryType",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Organization",
                 columns: table => new
                 {
@@ -280,32 +281,6 @@ namespace DynamicData.Migrations
                         name: "FK_Role_User_UserID",
                         column: x => x.UserID,
                         principalTable: "User",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Authorization",
-                columns: table => new
-                {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    LibraryID = table.Column<int>(nullable: true),
-                    SecurityGroupID = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Authorization", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Authorization_Library_LibraryID",
-                        column: x => x.LibraryID,
-                        principalTable: "Library",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Authorization_SecurityGroup_SecurityGroupID",
-                        column: x => x.SecurityGroupID,
-                        principalTable: "SecurityGroup",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -395,6 +370,32 @@ namespace DynamicData.Migrations
                         name: "FK_LibraryLog_Library_LibraryID",
                         column: x => x.LibraryID,
                         principalTable: "Library",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Authorization",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LibraryID = table.Column<int>(nullable: true),
+                    SecurityGroupID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Authorization", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Authorization_Library_LibraryID",
+                        column: x => x.LibraryID,
+                        principalTable: "Library",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Authorization_SecurityGroup_SecurityGroupID",
+                        column: x => x.SecurityGroupID,
+                        principalTable: "SecurityGroup",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -620,16 +621,6 @@ namespace DynamicData.Migrations
                 column: "ItemID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Library_CreatedByID",
-                table: "Library",
-                column: "CreatedByID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Library_EditedByID",
-                table: "Library",
-                column: "EditedByID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Library_LibraryTypeID",
                 table: "Library",
                 column: "LibraryTypeID");
@@ -703,6 +694,9 @@ namespace DynamicData.Migrations
 
             migrationBuilder.DropTable(
                 name: "FieldValue");
+
+            migrationBuilder.DropTable(
+                name: "FormularDefinition");
 
             migrationBuilder.DropTable(
                 name: "ItemFile");

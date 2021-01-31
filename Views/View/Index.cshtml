@@ -92,9 +92,6 @@
     </div>
 </div>
 
-
-
-
 @section scripts {
     <script>
         var editor; // use a global for the submit and return data
@@ -512,7 +509,10 @@
                  $.ajax(
                     {
                         url: '@Url.Action("_ActionField", "Partial")/@ViewData["libGuid"]',
-                        type: 'POST',
+                         type: 'POST',
+                         beforeSend: function () {
+                             $("#btn-field-save").html("<i class='fas fa-sync fa-spin'></i> Processing...");
+                         },
                         data: $(form).serialize(),
                          success: function (res) {
                             if (res.success) {
@@ -632,8 +632,6 @@
             var linkLibrary = $("#LinkToLibrary").val();
             var dependentField = $("#DependentFields").val();
             var linkLibraryName = $("#LinkToLibrary option:selected").text().split("/").pop();
-
-
                 $.getJSON("@Url.Action("InsertLinkLibrary","View")", {
                     field: currentField,
                     linkLibrary: linkLibrary,
@@ -728,8 +726,8 @@
             $("#Formular").val(func + "[L_" + library + "]([F_" + field + "])");
             $("#FormularView").val(func + "[" + $("#FormularLibraryGuid :selected").text() + "]([" + $("#FieldCollection :selected").text() + "])");
 
-        }
 
+        }
     </script>
 
 }

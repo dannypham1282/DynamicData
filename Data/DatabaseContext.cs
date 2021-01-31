@@ -34,6 +34,8 @@ namespace DynamicData.Data
         public DbSet<Organization> Organization { get; set; }
         public DbSet<UserOrganization> UserOrganization { get; set; }
         public DbSet<OrganizationLibrary> OrganizationLibrary { get; set; }
+
+        public DbSet<FormularDefinition> FormularDefinition { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
