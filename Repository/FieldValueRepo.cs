@@ -119,29 +119,29 @@ namespace DynamicData.Repository
             return await _context.FieldValue.Where(w => w.FieldID == ID).OrderBy(o => o.Field.Title).ToListAsync();
         }
 
-        public async Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue)
+        public Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue,string currentValue)
         {
             try
             {
-                _iCommon.SPNonQuery("spUpdateValueForRelatedDropdown '" + libraryGuid + "','" + fieldName + "', '" + newValue + "'");
-                return true;
+                _iCommon.SPNonQuery("spUpdateValueForRelatedDropdown '" + libraryGuid + "','" + fieldName + "', '" + newValue + "','" + currentValue + "'");
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
-                return false;
+                return Task.FromResult(false);
             }
         }
 
-        public async Task<bool> UpdateValueForDropdownWhenDeleted(Guid libraryGuid, int itemID)
+        public  Task<bool> UpdateValueForDropdownWhenDeleted(Guid libraryGuid, int itemID)
         {
             try
             {
                 _iCommon.SPNonQuery("spUpdateValueForDropdownWhenDeleted '" + libraryGuid + "','" + itemID + "'");
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
-                return false;
+                return Task.FromResult(false);
             }
         }
 

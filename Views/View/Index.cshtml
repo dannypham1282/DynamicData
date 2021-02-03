@@ -714,20 +714,70 @@
             initialDataTable();
         }
 
+        var FormularView = "";
+        var baseFormular = "";
         function setFormularFunction() {
             var func = $("#ddlFormularOper").val();
-            var library = $("#FormularLibraryGuid :selected").val();
-            var field = $("#FieldCollection :selected").val();
-            if (field == "")
-                field = "Field";
-            if (library == "")
-                library == "Library";
-            console.log(library);
-            $("#Formular").val(func + "[L_" + library + "]([F_" + field + "])");
-            $("#FormularView").val(func + "[" + $("#FormularLibraryGuid :selected").text() + "]([" + $("#FieldCollection :selected").text() + "])");
+            //var library = $("#FormularLibraryGuid :selected").val();
+            //var field = $("#CalculatedField :selected").val();
+            ////if (reloadCtr)
+            ////    getFieldByLibrary(library, 'CalculatedField');
+            //if (field == "")
+            //    field = "Field";
+            //if (library == "")
+            //    library == "Library";
+            //console.log(library);
+            //$("#Formular").val(func + "[L_" + library + "]([F_" + field + "])");
+            //FormularView = func + + "||[[";
 
-
+            //FormularView += ";"
+            //$("#FormularView").val(func + "||[[" $("#ddlFormularIndicator").text() + "][" + + $("#FormularLibraryGuid :selected").text() + "]([" + $("#CalculatedField :selected").text() + "])");
+            baseFormular = $("#ddlFormularFunc :selected").text() + "([" + $("#ddlFormularOper :selected").text() + "]";
+            $("#FormularView").val(baseFormular);
+            
         }
+
+
+      
+        //=() || [Formular_Definition]
+        //Function ([Source Data]|LibraryGuid.FieldGuid],[Target_LibraryGuid.Target_FieldGuid])
+
+        function updateForumlar() {
+            FormularView = "[" + $("#FormularLibraryGuid :selected").text() + "." + $("#CalculatedField :selected").text() + "])";           
+            FormularView = $("#FormularView").val() + FormularView;
+            $("#FormularView").val(FormularView.replaceAll(")[", ",["));
+        }
+
+
+        function resetFormular() {
+            $("#FormularView").val("");
+        }
+
+        function getFieldByLibrary(libraryCTR,fieldCTR) {
+            $.getJSON("@Url.Action("GetFieldsByLibrary","View")", { libraryGuid: $(libraryCTR).val() }, function (res) {
+                if (res.status) {
+                    $("#" + fieldCTR).empty();
+                    $.each(res.result, function (key, object) {
+                        var $option;
+
+                        //$.each(object, function (id, value) {
+                            $option = $("<option/>", {
+                                value: $(object)[0].guid,
+                                text:$(object)[0].title
+                           });
+                        //});
+                       // console.log(value);
+
+                        $("#" + fieldCTR).append($option);
+                    });
+                }
+                else {
+                    toastr.error("Failed to load Fields for Library");
+                }
+
+            });
+        }
+
     </script>
 
 }

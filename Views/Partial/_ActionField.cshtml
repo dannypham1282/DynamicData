@@ -55,7 +55,7 @@
                     <div class="col-sm-3">
                         @Html.LabelFor(x => x.SortDirection, new { @class = "col-form-label text-sm-right" })
                         @Html.DropDownListFor(model => model.SortDirection, new SelectList(new List<SelectListItem>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {
                                     new SelectListItem { Text = "asc", Value = "asc"},
                                     new SelectListItem { Text = "desc", Value = "desc"}}, "Value", "Text"), new { @class = "form-control", @placeholder = "Field Type" })
                         <span asp-validation-for="SortDirection" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
@@ -68,7 +68,7 @@
                             <span asp-validation-for="IsVisible" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
                         </div>
                         @*@Html.LabelFor(x => x.LookupTable, new { @class = "col-form-label text-sm-right" })
-                            @Html.DropDownListFor(model => model.LookupTable, new SelectList(Model.LibraryCollection, "GUID", "Title"), "Select a Link Library", new { @class = "form-control", @placeholder = "Library Collection", onchange = "getFieldByLookupTable('LookUpValue')" })*@
+                @Html.DropDownListFor(model => model.LookupTable, new SelectList(Model.LibraryCollection, "GUID", "Title"), "Select a Link Library", new { @class = "form-control", @placeholder = "Library Collection", onchange = "getFieldByLookupTable('LookUpValue')" })*@
                     </div>
                     <div class="col-sm-2">
                         <div class="custom-control custom-switch" style="padding-top:50px">
@@ -115,51 +115,90 @@
                     </div>
                 </div>
                 <div class="row">
+                    <div class="col-sm-12">
+                        <hr style="background-color:black" />
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-sm-3">
                         <h5>Formular:</h5>
                     </div>
                     <div class="col-sm-9"></div>
                 </div>
+               
                 <div class="row">
-                    <div class="col-sm-8">
-                        @Html.LabelFor(x => x.LibraryCollection, new { @class = "col-form-label text-sm-right" })
-                        @Html.DropDownListFor(model => model.FormularLibraryGuid, new SelectList(Model.LibraryCollection, "GUID", "Title"), "Select Library", new { @class = "form-control", @placeholder = "Field Type", onchange = "setFormularFunction()" })
-                        <span asp-validation-for="FormularLibraryGuid" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
-
-                    </div>
-                    <div class="col-sm-4">
-                        @Html.LabelFor(x => x.FieldCollection, new { @class = "col-form-label text-sm-right" })
-                        @Html.DropDownListFor(model => model.FieldCollection, new SelectList(Model.FieldCollection, "GUID", "Title"), "Select Field", new { @class = "form-control ", @placeholder = "Library Type", onchange = "setFormularFunction()" })
-                        <span asp-validation-for="FieldCollection" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
-
+                    <div class="col-sm-12">
+                        @*@Html.LabelFor(x => x.Formular, new { @class = "col-form-label text-sm-right" })*@
+                        @Html.TextAreaFor(model => model.FormularView, new { maxlength = 10000, @class = "form-control", @placeholder = "" })
+                        @*@Html.TextBoxFor(model => model.FormularView, new { htmlAttributes = new { @class = "form-control formular-box", @placeholder = "", @height = "50" } })*@
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-3">
+                        <label class="col-form-label text-sm-right"></label>
+                        <h5>Setting:</h5>
+                    </div>
+                    <div class="col-sm-9"></div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
                         <label class="col-form-label text-sm-right" for="ddlFormularOper">Functions</label>
-                        <select id="ddlFormularOper" name="ddlFormularOper" class="form-control" onchange="setFormularFunction()">
+                        <select id="ddlFormularFunc" name="ddlFormularFunc" class="form-control" onchange="setFormularFunction()">
                             <option value="" selected>--Select Function--</option>
-                            <option value="MonthYear()">MonthYear()</option>
-                            <option value="Year()">Year()</option>
-                            <option value="TopRecord()">TopRecord()</option>
-                            <option value="Sum()">Sum()</option>
-                            <option value="Total()">Total()</option>
+                            <option value="MonthYear()">=MonthYear()</option>
+                            <option value="Year()">=Year()</option>
+                            <option value="TopRecord()">=TopRecord()</option>
+                            <option value="Sum()">=Sum()</option>
+                            <option value="Total()">=Total()</option>
+                            <option value="=()">=()</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="col-form-label text-sm-right" for="ddlFormularOper">Operators</label>
+                        <select id="ddlFormularOper" name="ddlFormularOper" onchange="setFormularFunction()" class="form-control">
+                            <option value="" selected>None</option>
+                            <option value="SourceField">Source Data</option>
+                            <option value="CalculateField">Calculate Field</option>
+                            <option value="+">+</option>
+                            <option value="-">-</option>
+                            <option value="*">x</option>
+                            <option value="/">/</option>
+                            <option value="(">(</option>
+                            <option value=")">)</option>
                         </select>
                     </div>
 
                 </div>
                 <div class="row">
-                    <div class="col-sm-12">
-                        @Html.LabelFor(x => x.Formular, new { @class = "col-form-label text-sm-right" })
-                        @Html.EditorFor(model => model.FormularView, new { htmlAttributes = new { @class = "form-control", @placeholder = "FormularView" } })
+                    <div class="col-sm-9">
+                        @Html.LabelFor(x => x.LibraryCollection, new { @class = "col-form-label text-sm-right" })
+                        @Html.DropDownListFor(model => model.FormularLibraryGuid, new SelectList(Model.LibraryCollection, "GUID", "Title"), "Select Library", new { @class = "form-control", @placeholder = "Field Type", onchange = "getFieldByLibrary(this,'CalculatedField')" })
+                        <span asp-validation-for="FormularLibraryGuid" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
+
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.LabelFor(x => x.CalculatedField, new { @class = "col-form-label text-sm-right" })
+                        @Html.DropDownListFor(model => model.CalculatedField, new SelectList(Model.CalculatedField, "GUID", "Title"), "Select Field", new { @class = "form-control ", @placeholder = "Library Type",  })
+                        <span asp-validation-for="CalculatedField" class="form-text d-inline-block text-danger text-75 text-600 ml-sm-2"></span>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-sm-2">
+
+                        <a class="btn btn-outline-primary form-control" href="#" onclick="updateForumlar();">Update</a>
+                    </div>
+                    <div class="col-sm-2">
+
+                        <a class="btn btn-outline-danger form-control" href="#" onclick="resetFormular();">Reset</a>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
-                <button type="submit" id="btn-field-save" class="btn btn-outline-primary">Save Changes</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
+                    <button type="submit" id="btn-field-save" class="btn btn-outline-primary">Save Changes</button>
+                </div>
             </div>
-        </div>
     </div>
 </form>

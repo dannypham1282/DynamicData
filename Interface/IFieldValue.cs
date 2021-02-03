@@ -24,7 +24,7 @@ namespace DynamicData.Interface
         //   public Task<FieldValue> FindByFieldAndLibrary(int fieldID, Guid libraryGuid);
 
         public Task<FieldValue> FindbyNameAndLibraryGuidAndItemID(string name, Guid libraryGuid, int itemID);
-        public Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue);
+        public Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue,string currentValue);
         public Task<bool> UpdateValueForDropdownWhenDeleted(Guid libraryGuid, int itemID);
 
         public Task<bool> CheckDuplicateFieldValue(int fieldID, string value);

@@ -41,7 +41,7 @@ namespace DynamicData.Controllers
                 Guid = Guid.Parse(string.IsNullOrEmpty(guid) ? Guid.NewGuid().ToString() : guid);
             try
             {
-                var fieldCollection = await _iField.FindByLibraryGuid(libraryGuid);
+                var calculatedField = await _iField.FindByLibraryGuid(libraryGuid);
                 if (guid != "0") // load Field object with value for edit form
                 {
                     var field = await _iField.FindByGuid(Guid);
@@ -53,7 +53,7 @@ namespace DynamicData.Controllers
                     field.IsCheckDuplicate = (field.CheckDubplicate == 1) ? true : false;
                     field.FormularLibraryGuid = libraryGuid;
                     field.LibraryCollection = _iCommon.LibraryHierarchy();
-                    field.FieldCollection = fieldCollection;
+                    field.CalculatedField = calculatedField;
                     return View(field);
                 }
                 else // load empty Field Object for add form
@@ -67,7 +67,7 @@ namespace DynamicData.Controllers
                     field.IsCheckDuplicate = false;
                     field.FormularLibraryGuid = libraryGuid;
                     field.LibraryCollection = _iCommon.LibraryHierarchy();
-                    field.FieldCollection = fieldCollection;
+                    field.CalculatedField = calculatedField;
                     return View(field);
                 }
             }
@@ -238,7 +238,7 @@ namespace DynamicData.Controllers
 
         [HttpGet]
         [Route("Partial/LoadLinkLibrary")]
-        public async Task<IActionResult> LoadLinkLibrary(Guid libraryGuid)
+        public IActionResult LoadLinkLibrary(Guid libraryGuid)
         {
             try
             {

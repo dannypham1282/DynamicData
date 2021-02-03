@@ -45,7 +45,7 @@ namespace DynamicData.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Organizations()
+        public IActionResult Organizations()
         {
             return View();
         }

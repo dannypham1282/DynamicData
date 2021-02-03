@@ -54,7 +54,7 @@ namespace DynamicData.Models
 
         [NotMapped]
         [DisplayName("Field")]
-        public List<Field> FieldCollection { get; set; }
+        public List<Field> CalculatedField { get; set; }
 
         [DisplayName("Link to Library")]
         [AllowNull]

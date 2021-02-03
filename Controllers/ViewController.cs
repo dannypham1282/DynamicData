@@ -2,6 +2,7 @@
 using DynamicData.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+//using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System;
@@ -37,7 +38,7 @@ namespace DynamicData.Controllers
             _iFieldValue = iFieldValue;
             _iCommon = iCommon;
         }
-        public async Task<IActionResult> Index(string guid)
+        public IActionResult Index(string guid)
         {
             ViewData["libGuid"] = guid;
             return View();
@@ -48,6 +49,7 @@ namespace DynamicData.Controllers
         {
             string requestGuid = Common.GetGuidFromURL(Request.Path.ToString());
             var libraries = await _iLibrary.LibraryCollection();
+           // var test = CSharpScript.EvaluateAsync("7+8*2/4").Result;
             return Content(BreadCrumbs(libraries, (requestGuid == "") ? Guid.Empty : Guid.Parse(requestGuid)));
         }
 
@@ -376,6 +378,7 @@ namespace DynamicData.Controllers
                                         fieldValue.LibraryGuid = libraryGuid;
                                         fieldValue.Updated = DateTime.Now;
                                         await _iFieldValue.Add(fieldValue);
+                                        return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
                                     }
                                     else
                                         return new JsonResult(new { status = false, result = validation.Status });
@@ -386,6 +389,7 @@ namespace DynamicData.Controllers
                                 if (fieldValue.Field.Editable > 0)// only update field with that allow to edit 
                                 {
                                     var validation = ValidateForm(fieldValue.Field, HttpContext.Request.Form[key].ToString());
+                                    string currentFieldValueText = fieldValue.Value;
                                     if (validation.Status == null)
                                     {
                                         fieldValue.Value = HttpContext.Request.Form[key].ToString();
@@ -395,7 +399,7 @@ namespace DynamicData.Controllers
                                     else
                                         return new JsonResult(new { status = false, result = validation.Status });
 
-                                    await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString());
+                                    await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString(), currentFieldValueText);
                                     await _iFieldValue.CalculateFormularField(fieldValue.ItemID, libraryGuid, fieldValue.Field.GUID);
                                     // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
                                     return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
@@ -407,7 +411,7 @@ namespace DynamicData.Controllers
                 else if (HttpContext.Request.Form["action"].ToString() == "remove")//remove)
                 {
                     string[] keys = Common.getUpdateKey(HttpContext.Request.Form.Keys.ToArray()[0]);
-                    await _iFieldValue.UpdateValueForDropdownWhenDeleted(libraryGuid, Convert.ToInt32(keys[0]));
+                     await _iFieldValue.UpdateValueForDropdownWhenDeleted(libraryGuid, Convert.ToInt32(keys[0]));
                     await _iItem.Delete(Convert.ToInt32(keys[0]));
                     return new JsonResult(new { result = "Record has been deleted" });
                 }
@@ -423,7 +427,7 @@ namespace DynamicData.Controllers
             }
         }
 
-        public async Task<IActionResult> LoadData()
+        public IActionResult LoadData()
         {
             string requestGuid = Common.GetGuidFromURL(Request.Path.ToString());//Get guid from query string
             Guid libraryGuid = (requestGuid == null) ? Guid.Empty : (requestGuid == "") ? Guid.Empty : Guid.Parse(requestGuid);
