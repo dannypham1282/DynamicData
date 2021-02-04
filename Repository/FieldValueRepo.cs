@@ -14,7 +14,7 @@ namespace DynamicData.Repository
         private readonly DatabaseContext _context;
         private readonly ICommon _iCommon;
         private readonly IItem _iItem;
-       
+
 
 
         public FieldValueRepo(DatabaseContext dbContext, ICommon iCommon, IItem iItem)
@@ -22,7 +22,7 @@ namespace DynamicData.Repository
             _context = dbContext;
             _iCommon = iCommon;
             _iItem = iItem;
-           
+
         }
 
         public async Task<FieldValue> Add(FieldValue fieldValue)
@@ -119,7 +119,7 @@ namespace DynamicData.Repository
             return await _context.FieldValue.Where(w => w.FieldID == ID).OrderBy(o => o.Field.Title).ToListAsync();
         }
 
-        public Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue,string currentValue)
+        public Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue, string currentValue)
         {
             try
             {
@@ -132,7 +132,7 @@ namespace DynamicData.Repository
             }
         }
 
-        public  Task<bool> UpdateValueForDropdownWhenDeleted(Guid libraryGuid, int itemID)
+        public Task<bool> UpdateValueForDropdownWhenDeleted(Guid libraryGuid, int itemID)
         {
             try
             {
@@ -160,41 +160,95 @@ namespace DynamicData.Repository
             }
         }
 
-        public async Task<bool> CalculateFormularField(int ItemID, Guid libraryGuid, Guid? currentFieldGuid)
+        //public async Task<bool> CalculateFormularField(int ItemID, Guid libraryGuid, Guid? currentFieldGuid)
+        //{
+        //    try
+        //    {
+        //        var formularFields = await _context.Field.Where(w => w.LibraryGuid == libraryGuid && w.Formular != null).AsNoTracking().ToListAsync();
+        //        foreach (var formularField in formularFields)
+        //        {
+        //            var fieldValue = await _context.FieldValue.Where(w => w.FieldID == formularField.ID && w.ItemID == ItemID).AsNoTracking().FirstOrDefaultAsync();
+        //            if (fieldValue == null) //If no value record is created then create one
+        //            {
+        //                var item = await _iItem.FindByID(ItemID);
+        //                var newFieldValue = new FieldValue();
+        //                newFieldValue.Item = item;
+        //                newFieldValue.FieldID = formularField.ID;
+        //                newFieldValue.ItemGuid = item.GUID;
+        //                newFieldValue.LibraryGuid = libraryGuid;
+        //                newFieldValue.Updated = DateTime.Now;
+        //                newFieldValue.Value = "";
+        //                await this.Add(newFieldValue);
+        //            }
+
+        //            string formular = formularField.Formular;
+        //            if (!string.IsNullOrEmpty(formular))
+        //            {
+        //                string function = formular.Substring(0, formular.IndexOf("()["));// seperator for function. Index from 0 to the function seperator to find function name
+        //                string formularDef = formular.Substring(formular.IndexOf("]([") + 3).TrimEnd(new char[] { ']', ')' });// seperator for formular detail. substring from this seperator to the end of the formular string to find formular definition
+        //                                                                                                                      //if (currentFieldGuid == null || formularDef.IndexOf(currentFieldGuid.ToString()) > -1) // Check current field is part of the formular definition. If current field is part of it, trigger the formular calculation else do nothing
+        //                                                                                                                      // {
+        //                string calculatedFieldGuid = formularDef.Replace("F_", "");
+        //                _iCommon.SPNonQuery("spUpdateCellValueByFormular " + ItemID + ",'" + function + "','" + calculatedFieldGuid + "', '" + formularField.GUID + "'");
+        //                // }
+        //            }
+        //            //string libraryGuid = "";
+        //        }
+        //        // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return false;
+        //    }
+        //}
+
+        public async Task<bool> CalculateFormularField(int ItemID, Guid currentFieldGuid)
         {
             try
             {
-                var formularFields = await _context.Field.Where(w => w.LibraryGuid == libraryGuid && w.Formular != null).AsNoTracking().ToListAsync();
-                foreach (var formularField in formularFields)
+                var calculateField = await _context.Field.Where(w => w.Formular.IndexOf(currentFieldGuid.ToString()) > -1).AsNoTracking().ToListAsync();
+                foreach (Field field in calculateField)
                 {
-                    var fieldValue = await _context.FieldValue.Where(w => w.FieldID == formularField.ID && w.ItemID == ItemID).AsNoTracking().FirstOrDefaultAsync();
+                    var fieldValue = await _context.FieldValue.Where(w => w.FieldID == field.ID).AsNoTracking().FirstOrDefaultAsync();
                     if (fieldValue == null) //If no value record is created then create one
                     {
                         var item = await _iItem.FindByID(ItemID);
                         var newFieldValue = new FieldValue();
                         newFieldValue.Item = item;
-                        newFieldValue.FieldID = formularField.ID;
+                        newFieldValue.FieldID = field.ID;
                         newFieldValue.ItemGuid = item.GUID;
-                        newFieldValue.LibraryGuid = libraryGuid;
+                        newFieldValue.LibraryGuid = field.LibraryGuid;
                         newFieldValue.Updated = DateTime.Now;
                         newFieldValue.Value = "";
                         await this.Add(newFieldValue);
                     }
 
-                    string formular = formularField.Formular;
+                    string formular = field.Formular;
                     if (!string.IsNullOrEmpty(formular))
                     {
-                        string function = formular.Substring(0, formular.IndexOf("()["));// seperator for function. Index from 0 to the function seperator to find function name
-                        string formularDef = formular.Substring(formular.IndexOf("]([") + 3).TrimEnd(new char[] { ']', ')' });// seperator for formular detail. substring from this seperator to the end of the formular string to find formular definition
-                                                                                                                              //if (currentFieldGuid == null || formularDef.IndexOf(currentFieldGuid.ToString()) > -1) // Check current field is part of the formular definition. If current field is part of it, trigger the formular calculation else do nothing
-                                                                                                                              // {
-                        string calculatedFieldGuid = formularDef.Replace("F_", "");
-                        _iCommon.SPNonQuery("spUpdateCellValueByFormular " + ItemID + ",'" + function + "','" + calculatedFieldGuid + "', '" + formularField.GUID + "'");
+                        //=Sum()([Source Data][b185aa24-fb82-4f21-bcfc-e7cdb3add5a1],[af656123-fe33-4120-a251-79bdfb167753])
+                        string function = formular.Substring(1, formular.IndexOf("()")-1);// seperator for function. Index from 1 to the function seperator to find function name
+                        string formularRaw = formular.Substring(formular.IndexOf("()(") + 3).TrimEnd(new char[] { ')', ')' });// seperator for formular detail. substring from this seperator to the end of the formular string to find formular definition
+                        string[] formularDef = formularRaw.Split(',');
+                        Guid sourceField = Guid.NewGuid() ;
+                        Guid calculatedField;
+                        if (formularDef[0].ToLower().IndexOf("source data") > -1)
+                        {
+                            sourceField = new Guid( formularDef[0].Replace("[Source Data][", "").Replace("]",""));
+                            calculatedField = new Guid(formularDef[1].Replace("[", "").Replace("]", ""));
+                        }
+                        else
+                        {
+                            calculatedField = new Guid(formularDef[0].Replace("[","").Replace("]",""));
+                        }
+
+                        //string calculatedFieldGuid = formularDef.Replace("F_", "");
+                        //spUpdateCellValueByFormular ItemID,function,sourceField,calcuatedField,TargetField
+                        _iCommon.SPNonQuery("spUpdateCellValueByFormular " + ItemID + ",'" + function + "','" + sourceField + "', '" + calculatedField + "','" + field.GUID + "'");
                         // }
                     }
-                    //string libraryGuid = "";
                 }
-                // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
                 return true;
             }
             catch (Exception ex)
@@ -203,5 +257,4 @@ namespace DynamicData.Repository
             }
         }
     }
-
 }

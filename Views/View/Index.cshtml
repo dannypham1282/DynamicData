@@ -715,6 +715,7 @@
         }
 
         var FormularView = "";
+        var FormularRaw = "";
         var baseFormular = "";
         function setFormularFunction() {
             var func = $("#ddlFormularOper").val();
@@ -734,11 +735,10 @@
             //$("#FormularView").val(func + "||[[" $("#ddlFormularIndicator").text() + "][" + + $("#FormularLibraryGuid :selected").text() + "]([" + $("#CalculatedField :selected").text() + "])");
             baseFormular = $("#ddlFormularFunc :selected").text() + "([" + $("#ddlFormularOper :selected").text() + "]";
             $("#FormularView").val(baseFormular);
+            $("#Formular").val(baseFormular);
             
         }
-
-
-      
+     
         //=() || [Formular_Definition]
         //Function ([Source Data]|LibraryGuid.FieldGuid],[Target_LibraryGuid.Target_FieldGuid])
 
@@ -746,11 +746,15 @@
             FormularView = "[" + $("#FormularLibraryGuid :selected").text() + "." + $("#CalculatedField :selected").text() + "])";           
             FormularView = $("#FormularView").val() + FormularView;
             $("#FormularView").val(FormularView.replaceAll(")[", ",["));
-        }
 
+            FormularRaw = "[" + $("#CalculatedField :selected").val() + "])";
+            FormularRaw = $("#Formular").val() + FormularRaw;
+            $("#Formular").val(FormularRaw.replaceAll(")[", ",["));          
+        }
 
         function resetFormular() {
             $("#FormularView").val("");
+            $("#Formular").val();
         }
 
         function getFieldByLibrary(libraryCTR,fieldCTR) {
@@ -759,7 +763,6 @@
                     $("#" + fieldCTR).empty();
                     $.each(res.result, function (key, object) {
                         var $option;
-
                         //$.each(object, function (id, value) {
                             $option = $("<option/>", {
                                 value: $(object)[0].guid,
@@ -767,17 +770,13 @@
                            });
                         //});
                        // console.log(value);
-
                         $("#" + fieldCTR).append($option);
                     });
                 }
                 else {
                     toastr.error("Failed to load Fields for Library");
                 }
-
             });
         }
-
     </script>
-
 }

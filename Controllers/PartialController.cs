@@ -141,7 +141,7 @@ namespace DynamicData.Controllers
                             List<Item> libraryItems = await _iItem.ItemCollection(libraryGuid);
                            foreach (Item item in libraryItems)
                             {
-                                await _iFieldValue.CalculateFormularField(item.ID, libraryGuid, field.GUID);
+                                await _iFieldValue.CalculateFormularField(item.ID,  field.GUID);
                             }
                         }
                         status = true;
