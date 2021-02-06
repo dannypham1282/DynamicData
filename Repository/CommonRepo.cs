@@ -1,7 +1,6 @@
 ﻿using DynamicData.Data;
 using DynamicData.Interface;
 using DynamicData.Models;
-
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

@@ -718,22 +718,11 @@
         var FormularRaw = "";
         var baseFormular = "";
         function setFormularFunction() {
-            var func = $("#ddlFormularOper").val();
-            //var library = $("#FormularLibraryGuid :selected").val();
-            //var field = $("#CalculatedField :selected").val();
-            ////if (reloadCtr)
-            ////    getFieldByLibrary(library, 'CalculatedField');
-            //if (field == "")
-            //    field = "Field";
-            //if (library == "")
-            //    library == "Library";
-            //console.log(library);
-            //$("#Formular").val(func + "[L_" + library + "]([F_" + field + "])");
-            //FormularView = func + + "||[[";
-
-            //FormularView += ";"
-            //$("#FormularView").val(func + "||[[" $("#ddlFormularIndicator").text() + "][" + + $("#FormularLibraryGuid :selected").text() + "]([" + $("#CalculatedField :selected").text() + "])");
-            baseFormular = $("#ddlFormularFunc :selected").text() + "([" + $("#ddlFormularOper :selected").text() + "]";
+          
+            if ($("#ddlFormularOper :selected").text()!="")
+                baseFormular = $("#ddlFormularFunc :selected").text() + "([" + $("#ddlFormularOper :selected").text() + "]";
+            else
+                baseFormular = $("#ddlFormularFunc :selected").text() + "(";
             $("#FormularView").val(baseFormular);
             $("#Formular").val(baseFormular);
             

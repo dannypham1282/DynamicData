@@ -101,6 +101,11 @@ namespace DynamicData.Repository
             return await _context.FieldValue.Include(i => i.Item).Include(f => f.Field).ThenInclude(t => t.FieldType).Where(w => w.Field.Name.ToLower() == name.Trim().ToLower() && w.LibraryGuid == libraryGuid && w.Item.ID == itemID).FirstOrDefaultAsync();
         }
 
+        public async Task<FieldValue> FindbyGuidAndLibraryGuidAndItemID(Guid fieldGuid, Guid libraryGuid, int itemID)
+        {
+            return await _context.FieldValue.Include(i => i.Item).Include(f => f.Field).ThenInclude(t => t.FieldType).Where(w => w.Field.GUID == fieldGuid && w.LibraryGuid == libraryGuid && w.Item.ID == itemID).FirstOrDefaultAsync();
+        }
+
         public async Task<FieldValue> Update(FieldValue fieldValue)
         {
             _context.FieldValue.Update(fieldValue);
@@ -203,11 +208,11 @@ namespace DynamicData.Repository
         //    }
         //}
 
-        public async Task<bool> CalculateFormularField(int ItemID, Guid currentFieldGuid)
+        public async Task<bool> CalculateFormularField(int ItemID, int deletedRow,Guid currentFieldGuid)
         {
             try
             {
-                var calculateField = await _context.Field.Where(w => w.Formular.IndexOf(currentFieldGuid.ToString()) > -1).AsNoTracking().ToListAsync();
+                var calculateField = await _context.Field.Where(w => w.Formular.IndexOf(currentFieldGuid.ToString()) > -1 ).AsNoTracking().ToListAsync();
                 foreach (Field field in calculateField)
                 {
                     var fieldValue = await _context.FieldValue.Where(w => w.FieldID == field.ID).AsNoTracking().FirstOrDefaultAsync();
@@ -241,11 +246,12 @@ namespace DynamicData.Repository
                         else
                         {
                             calculatedField = new Guid(formularDef[0].Replace("[","").Replace("]",""));
+                            sourceField = new Guid();
                         }
 
                         //string calculatedFieldGuid = formularDef.Replace("F_", "");
                         //spUpdateCellValueByFormular ItemID,function,sourceField,calcuatedField,TargetField
-                        _iCommon.SPNonQuery("spUpdateCellValueByFormular " + ItemID + ",'" + function + "','" + sourceField + "', '" + calculatedField + "','" + field.GUID + "'");
+                        _iCommon.SPNonQuery("spUpdateCellValueByFormular " + ItemID + "," + deletedRow + ",'" + function + "','" + sourceField + "', '" + calculatedField + "','" + field.GUID + "'");
                         // }
                     }
                 }
@@ -256,5 +262,7 @@ namespace DynamicData.Repository
                 return false;
             }
         }
+
+       
     }
 }

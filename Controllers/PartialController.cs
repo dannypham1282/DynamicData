@@ -3,6 +3,7 @@ using DynamicData.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace DynamicData.Controllers
@@ -141,7 +142,42 @@ namespace DynamicData.Controllers
                             List<Item> libraryItems = await _iItem.ItemCollection(libraryGuid);
                            foreach (Item item in libraryItems)
                             {
-                                await _iFieldValue.CalculateFormularField(item.ID,  field.GUID);
+                                if (!string.IsNullOrEmpty(field.Formular))
+                                {
+                                   
+                                    if (field.Formular.IndexOf(field.GUID.ToString()) > -1)
+                                        await _iFieldValue.CalculateFormularField(item.ID,0, field.GUID);
+                                    else
+                                    {
+                                        string formular = field.Formular;
+                                        string function = formular.Substring(1, formular.IndexOf("()") - 1);
+                                        string formularRaw = formular.Substring(formular.IndexOf("()(") + 3).TrimEnd(new char[] { ')', ')' });
+                                        string[] formularDef = formularRaw.Split(',');
+                                        string calculatedValue = "";                                   
+                                        FieldValue targetFieldValue;
+                                        try
+                                        {
+                                            var calculatedFieldValue = _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(Guid.Parse(formularDef[0].Replace("[", "").Replace("]", "")), libraryGuid, item.ID).Result;
+                                            if (calculatedFieldValue != null)
+                                                calculatedValue = calculatedFieldValue.Value;
+                                            targetFieldValue = await _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(field.GUID, libraryGuid, item.ID);
+                                            if (function == "Year")
+                                            {
+                                                targetFieldValue.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString();
+                                                await _iFieldValue.Update(targetFieldValue);
+                                            }
+                                            else if (function == "MonthYear")
+                                            {
+                                                targetFieldValue.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString() + "-" + DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Month.ToString();
+                                                await _iFieldValue.Update(targetFieldValue);
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+                                        }
+                                    }
+                                }
                             }
                         }
                         status = true;

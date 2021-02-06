@@ -24,12 +24,14 @@ namespace DynamicData.Interface
         //   public Task<FieldValue> FindByFieldAndLibrary(int fieldID, Guid libraryGuid);
 
         public Task<FieldValue> FindbyNameAndLibraryGuidAndItemID(string name, Guid libraryGuid, int itemID);
+
+        public Task<FieldValue> FindbyGuidAndLibraryGuidAndItemID(Guid fieldGuid, Guid libraryGuid, int itemID);
         public Task<bool> UpdateAllRelatedDropdownValue(Guid libraryGuid, string fieldName, string newValue,string currentValue);
         public Task<bool> UpdateValueForDropdownWhenDeleted(Guid libraryGuid, int itemID);
 
         public Task<bool> CheckDuplicateFieldValue(int fieldID, string value);
 
-        public Task<bool> CalculateFormularField(int ItemID, Guid currentFieldGuid);
+        public Task<bool> CalculateFormularField(int ItemID,int deletedRow, Guid currentFieldGuid);
 
     }
 }

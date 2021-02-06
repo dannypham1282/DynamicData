@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -338,16 +339,35 @@ namespace DynamicData.Controllers
                         return new JsonResult(new { fieldErrors = validate });
                     else
                     {
+                        var valueDict = new Dictionary<string, string>();
                         foreach (var newValue in newRecord)
                         {
                             await _iFieldValue.Add(newValue);
+                            Field field = await _iField.FindByID((int)newValue.FieldID);
+                            valueDict.Add(field.GUID.ToString(), newValue.Value);
+                            if (!string.IsNullOrEmpty(field.Formular))
                             {
-                                Field field = await _iField.FindByID((int)newValue.FieldID);
-                                await _iFieldValue.CalculateFormularField(item.ID, field.GUID);                              
+                                string formular = field.Formular;
+                                string function = formular.Substring(1, formular.IndexOf("()") - 1);
+                                string formularRaw = formular.Substring(formular.IndexOf("()(") + 3).TrimEnd(new char[] { ')', ')' });
+                                string[] formularDef = formularRaw.Split(',');
+                                string calculatedValue = "";
+                                if (function == "Year")
+                                {
+                                    calculatedValue = valueDict[formularDef[0].Replace("[", "").Replace("]", "")];
+                                    newValue.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString();
+                                }
+                                else if (function == "MonthYear")
+                                {
+                                    calculatedValue = valueDict[formularDef[0].Replace("[", "").Replace("]", "")];
+                                    newValue.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString() + "-" + DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Month.ToString();
+                                }
                             }
+                            else
+                            {
+                                await _iFieldValue.CalculateFormularField(item.ID, 0,field.GUID);
+                            }                      
                         }
-
-                        // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
                         return new JsonResult(new { result = "New record has been updated." });
                     }
                 }
@@ -403,7 +423,7 @@ namespace DynamicData.Controllers
                                         return new JsonResult(new { status = false, result = validation.Status });
 
                                     await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString(), currentFieldValueText);
-                                    await _iFieldValue.CalculateFormularField(fieldValue.ItemID,  fieldValue.Field.GUID);
+                                    await _iFieldValue.CalculateFormularField(fieldValue.ItemID,0,  fieldValue.Field.GUID);
                                     // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
                                     return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
                                 }
@@ -414,8 +434,13 @@ namespace DynamicData.Controllers
                 else if (HttpContext.Request.Form["action"].ToString() == "remove")//remove)
                 {
                     string[] keys = Common.getUpdateKey(HttpContext.Request.Form.Keys.ToArray()[0]);
-                     await _iFieldValue.UpdateValueForDropdownWhenDeleted(libraryGuid, Convert.ToInt32(keys[0]));
-                    await _iItem.Delete(Convert.ToInt32(keys[0]));
+                    await _iFieldValue.UpdateValueForDropdownWhenDeleted(libraryGuid, Convert.ToInt32(keys[0]));
+                    //await _iItem.Delete(Convert.ToInt32(keys[0]));
+                    List<Field> fields = await _iField.FindByLibraryGuid(libraryGuid);
+                    foreach (Field field in fields)
+                    {
+                        await _iFieldValue.CalculateFormularField(Convert.ToInt32(keys[0]),1, field.GUID);
+                    }
                     return new JsonResult(new { result = "Record has been deleted" });
                 }
                 //  return new JsonResult(new { result = "success" });
