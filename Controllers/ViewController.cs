@@ -342,40 +342,47 @@ namespace DynamicData.Controllers
                     else
                     {
                         var valueDict = new Dictionary<string, string>();
+                        int itemID = 0;
                         foreach (var newValue in newRecord)
                         {
                             await _iFieldValue.Add(newValue);
-                            Field field = await _iField.FindByID((int)newValue.FieldID);
-                            valueDict.Add(field.GUID.ToString(), newValue.Value);
-                            if (!string.IsNullOrEmpty(field.Formular))
+                            itemID = newValue.ItemID;                           
+                        }
+
+                        List<FieldValue> fieldValues = await _iFieldValue.FindByItemAndLibrary(itemID, libraryGuid);
+                        foreach (FieldValue value in fieldValues)
+                        {
+                            valueDict.Add(value.Field.GUID.ToString(), value.Value);
+                        }
+
+                        foreach (FieldValue value in fieldValues)
+                        {
+                            if (!string.IsNullOrEmpty(value.Field.Formular))
                             {
-                                string formular = field.Formular;
+                                string formular = value.Field.Formular;
                                 string function = formular.Substring(1, formular.IndexOf("()") - 1);
                                 string formularRaw = formular.Substring(formular.IndexOf("()(") + 3).TrimEnd(new char[] { ')', ')' });
                                 string[] formularDef = formularRaw.Split(',');
                                 string calculatedValue = "";
                                 if (function == "Year")
                                 {
+
                                     calculatedValue = valueDict[formularDef[0].Replace("[", "").Replace("]", "")];
-                                    newValue.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString();
+                                    value.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString();
                                 }
                                 else if (function == "MonthYear")
                                 {
                                     calculatedValue = valueDict[formularDef[0].Replace("[", "").Replace("]", "")];
-                                    newValue.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString() + "-" + DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Month.ToString();
+                                    value.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString() + "-" + DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Month.ToString();
                                 }
-                                else if (function == "=") //Custom formular
-                                {
-
-                                }
-
-                                await _iFieldValue.Update(newValue);
+                                await _iFieldValue.Update(value);
                             }
                             else
                             {
-                                await _iFieldValue.CalculateFormularField(item.ID, 0,field.GUID);
-                            }                      
+                                await UpdateCalculateFieldValue(libraryGuid, value);
+                            }
                         }
+
                         return new JsonResult(new { result = "New record has been updated." });
                     }
                 }
@@ -431,32 +438,9 @@ namespace DynamicData.Controllers
                                         return new JsonResult(new { status = false, result = validation.Status });
 
                                     await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString(), currentFieldValueText);
+
                                     //Calculate Field
-                                    var calculatedFields = await _iFieldValue.GetAllCalculatedField(fieldValue.Field.GUID);
-                                    foreach (Field cField in calculatedFields)
-                                    {
-                                        string function = cField.Formular.Substring(0, cField.Formular.IndexOf("()"));// seperator for function. Index from 1 to the function seperator to find function name
-                                        string formularRaw = cField.Formular.Substring(cField.Formular.IndexOf("()") + 2);// seperator for formular detail. substring from this seperator to the end of the formular string to find formular definition
-                                        if (function == "=")//Custom function
-                                        {
-                                            var pattern = @"\[(.*?)\]";
-                                            var query = formularRaw;
-                                            var matches = Regex.Matches(query, pattern);
-                                            foreach(Match m in matches)
-                                            {                                             
-                                                formularRaw = formularRaw.Replace(m.ToString(), _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(new Guid(m.Groups[1].ToString()), libraryGuid, fieldValue.ItemID).Result.Value.ToString());
-                                            }
-                                            //var result = CSharpScript.EvaluateAsync(formularRaw).Result;
-                                            var calculatedFieldValue = await _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(cField.GUID, libraryGuid, fieldValue.ItemID);
-                                            calculatedFieldValue.Value = CSharpScript.EvaluateAsync(formularRaw).Result.ToString();
-                                            await _iFieldValue.Update(calculatedFieldValue);
-                                            // var f1 =  _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(cField.GUID, libraryGuid, fieldValue.ItemID).Result.Value;
-                                        }
-                                        else
-                                        {
-                                            await _iFieldValue.CalculateFormularField(fieldValue.ItemID, 0, fieldValue.Field.GUID);
-                                        }
-                                    }
+                                    await UpdateCalculateFieldValue(libraryGuid, fieldValue);
                                     return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
                                 }
                             }
@@ -494,6 +478,8 @@ namespace DynamicData.Controllers
                 });
             }
         }
+
+     
 
         public IActionResult LoadData()
         {
@@ -670,6 +656,45 @@ namespace DynamicData.Controllers
             catch (Exception ex)
             {
                 return new JsonResult(new { status = status, message = ex.Message });
+            }
+        }
+
+        private async Task UpdateCalculateFieldValue(Guid libraryGuid, FieldValue fieldValue)
+        {
+            var calculatedFields = await _iFieldValue.GetAllCalculatedField(fieldValue.Field.GUID);
+            foreach (Field cField in calculatedFields)
+            {
+                string function = cField.Formular.Substring(0, cField.Formular.IndexOf("()"));// seperator for function. Index from 1 to the function seperator to find function name
+                string formularRaw = cField.Formular.Substring(cField.Formular.IndexOf("()") + 2);// seperator for formular detail. substring from this seperator to the end of the formular string to find formular definition
+                if (function == "=")//Custom function
+                {
+                    var pattern = @"\[(.*?)\]";
+                    var query = formularRaw;
+                    var matches = Regex.Matches(query, pattern);
+                    foreach (Match m in matches)
+                    {
+                        formularRaw = formularRaw.Replace(m.ToString(), _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(new Guid(m.Groups[1].ToString()), libraryGuid, fieldValue.ItemID).Result.Value.ToString());
+                    }
+                    //var result = CSharpScript.EvaluateAsync(formularRaw).Result;
+                    var calculatedFieldValue = await _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(cField.GUID, libraryGuid, fieldValue.ItemID);
+                    if (calculatedFieldValue ==null)
+                    {
+                        calculatedFieldValue = new FieldValue();
+
+                        calculatedFieldValue.ItemID = fieldValue.ItemID;
+                        calculatedFieldValue.LibraryGuid = libraryGuid;
+                        calculatedFieldValue.FieldID = cField.ID;
+                        calculatedFieldValue.Value = "";
+                        await _iFieldValue.Add(calculatedFieldValue);
+                    }
+                    calculatedFieldValue.Value = CSharpScript.EvaluateAsync(formularRaw).Result.ToString();
+                    await _iFieldValue.Update(calculatedFieldValue);
+                    // var f1 =  _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(cField.GUID, libraryGuid, fieldValue.ItemID).Result.Value;
+                }
+                else
+                {
+                    await _iFieldValue.CalculateFormularField(fieldValue.ItemID, 0, fieldValue.Field.GUID);
+                }
             }
         }
     }

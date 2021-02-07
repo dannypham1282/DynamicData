@@ -153,14 +153,23 @@ namespace DynamicData.Controllers
                                         string function = formular.Substring(1, formular.IndexOf("()") - 1);
                                         string formularRaw = formular.Substring(formular.IndexOf("()(") + 3).TrimEnd(new char[] { ')', ')' });
                                         string[] formularDef = formularRaw.Split(',');
-                                        string calculatedValue = "";                                   
-                                        FieldValue targetFieldValue;
+                                        string calculatedValue = "";
+                                        FieldValue targetFieldValue ;
                                         try
                                         {
                                             var calculatedFieldValue = _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(Guid.Parse(formularDef[0].Replace("[", "").Replace("]", "")), libraryGuid, item.ID).Result;
                                             if (calculatedFieldValue != null)
                                                 calculatedValue = calculatedFieldValue.Value;
                                             targetFieldValue = await _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(field.GUID, libraryGuid, item.ID);
+                                            if (targetFieldValue == null)
+                                            {
+                                                targetFieldValue = new FieldValue();
+                                                targetFieldValue.ItemID = item.ID;
+                                                targetFieldValue.LibraryGuid = libraryGuid;
+                                                targetFieldValue.FieldID = field.ID;
+                                                targetFieldValue.Value = "";
+                                                await _iFieldValue.Add(targetFieldValue);
+                                            }
                                             if (function == "Year")
                                             {
                                                 targetFieldValue.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString();

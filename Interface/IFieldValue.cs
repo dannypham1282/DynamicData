@@ -35,5 +35,7 @@ namespace DynamicData.Interface
 
         public Task<List<Field>> GetAllCalculatedField(Guid fieldGuid);
 
+        public Task<List<FieldValue>> FindByItemAndLibrary(int itemID, Guid libraryGuid);
+
     }
 }

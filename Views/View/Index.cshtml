@@ -226,8 +226,14 @@
 
                         var returnTD = $('<tr/>');
                         for (i = 0; i < headerCount.length; i++) {
-                            if (headerCount[i]!= "")
-                                returnTD.append('<td class="classCurrencySum" >Total: ' + headerCount[i] + "</td>");
+                            if (headerCount[i] != "") {//#C82333
+                                if (headerCount[i].indexOf("(") > -1) {
+                                    returnTD.append('<td class="classCurrencySum" >Total: <span style="color:#C82333">' + headerCount[i] + "</span></td>");
+                                }
+                                else {
+                                    returnTD.append('<td class="classCurrencySum" >Total: ' + headerCount[i] + "</td>");
+                                }
+                            }
                             else
                                 returnTD.append("<td></td>");
                         }

@@ -268,5 +268,9 @@ namespace DynamicData.Repository
             return await _context.Field.Where(w => w.Formular.IndexOf(fieldGuid.ToString()) > -1).AsNoTracking().ToListAsync();
         }
 
+        public async Task<List<FieldValue>> FindByItemAndLibrary(int itemID, Guid libraryGuid)
+        {
+            return await _context.FieldValue.Include(i => i.Item).Include(f => f.Field).Where(w => w.LibraryGuid == libraryGuid && w.Item.ID == itemID).ToListAsync();
+        }
     }
 }
