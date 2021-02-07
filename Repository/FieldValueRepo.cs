@@ -263,6 +263,10 @@ namespace DynamicData.Repository
             }
         }
 
-       
+        public async Task<List<Field>> GetAllCalculatedField(Guid fieldGuid)
+        {
+            return await _context.Field.Where(w => w.Formular.IndexOf(fieldGuid.ToString()) > -1).AsNoTracking().ToListAsync();
+        }
+
     }
 }

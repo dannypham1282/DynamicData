@@ -33,5 +33,7 @@ namespace DynamicData.Interface
 
         public Task<bool> CalculateFormularField(int ItemID,int deletedRow, Guid currentFieldGuid);
 
+        public Task<List<Field>> GetAllCalculatedField(Guid fieldGuid);
+
     }
 }

@@ -2,6 +2,7 @@
 using DynamicData.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 //using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DynamicData.Controllers
@@ -362,6 +364,12 @@ namespace DynamicData.Controllers
                                     calculatedValue = valueDict[formularDef[0].Replace("[", "").Replace("]", "")];
                                     newValue.Value = DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Year.ToString() + "-" + DateTime.Parse(calculatedValue, new CultureInfo("en-US")).Month.ToString();
                                 }
+                                else if (function == "=") //Custom formular
+                                {
+
+                                }
+
+                                await _iFieldValue.Update(newValue);
                             }
                             else
                             {
@@ -423,8 +431,32 @@ namespace DynamicData.Controllers
                                         return new JsonResult(new { status = false, result = validation.Status });
 
                                     await _iFieldValue.UpdateAllRelatedDropdownValue(libraryGuid, filedName, HttpContext.Request.Form[key].ToString(), currentFieldValueText);
-                                    await _iFieldValue.CalculateFormularField(fieldValue.ItemID,0,  fieldValue.Field.GUID);
-                                    // spUpdateCellValueByFormular 94,'MonthYear','8D9E1500-21D2-4317-BA71-B57AF88ECCB6','86D07847-DF28-4F6C-AE0F-573C11C635B4'
+                                    //Calculate Field
+                                    var calculatedFields = await _iFieldValue.GetAllCalculatedField(fieldValue.Field.GUID);
+                                    foreach (Field cField in calculatedFields)
+                                    {
+                                        string function = cField.Formular.Substring(0, cField.Formular.IndexOf("()"));// seperator for function. Index from 1 to the function seperator to find function name
+                                        string formularRaw = cField.Formular.Substring(cField.Formular.IndexOf("()") + 2);// seperator for formular detail. substring from this seperator to the end of the formular string to find formular definition
+                                        if (function == "=")//Custom function
+                                        {
+                                            var pattern = @"\[(.*?)\]";
+                                            var query = formularRaw;
+                                            var matches = Regex.Matches(query, pattern);
+                                            foreach(Match m in matches)
+                                            {                                             
+                                                formularRaw = formularRaw.Replace(m.ToString(), _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(new Guid(m.Groups[1].ToString()), libraryGuid, fieldValue.ItemID).Result.Value.ToString());
+                                            }
+                                            //var result = CSharpScript.EvaluateAsync(formularRaw).Result;
+                                            var calculatedFieldValue = await _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(cField.GUID, libraryGuid, fieldValue.ItemID);
+                                            calculatedFieldValue.Value = CSharpScript.EvaluateAsync(formularRaw).Result.ToString();
+                                            await _iFieldValue.Update(calculatedFieldValue);
+                                            // var f1 =  _iFieldValue.FindbyGuidAndLibraryGuidAndItemID(cField.GUID, libraryGuid, fieldValue.ItemID).Result.Value;
+                                        }
+                                        else
+                                        {
+                                            await _iFieldValue.CalculateFormularField(fieldValue.ItemID, 0, fieldValue.Field.GUID);
+                                        }
+                                    }
                                     return new JsonResult(new { status = true, value = HttpContext.Request.Form[key].ToString(), result = filedName + " value " + fieldValue.Value + " has been updated" });
                                 }
                             }
@@ -440,6 +472,14 @@ namespace DynamicData.Controllers
                     foreach (Field field in fields)
                     {
                         await _iFieldValue.CalculateFormularField(Convert.ToInt32(keys[0]),1, field.GUID);
+                    }
+                    try
+                    {
+                        await _iItem.Delete(Convert.ToInt32(keys[0]));
+                    }
+                    catch (Exception ex)
+                    {
+
                     }
                     return new JsonResult(new { result = "Record has been deleted" });
                 }

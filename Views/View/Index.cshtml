@@ -719,26 +719,60 @@
         var baseFormular = "";
         function setFormularFunction() {
           
-            if ($("#ddlFormularOper :selected").text()!="")
-                baseFormular = $("#ddlFormularFunc :selected").text() + "([" + $("#ddlFormularOper :selected").text() + "]";
+            //if ($("#ddlFormularOper :selected").text()!="")
+            //    baseFormular = $("#ddlFormularFunc :selected").text() + "([" + $("#ddlFormularOper :selected").text() + "]";
+            //else
+            if ($("#ddlFormularFunc :selected").text() == "=()")
+                baseFormular = $("#ddlFormularFunc :selected").text() + "";
             else
                 baseFormular = $("#ddlFormularFunc :selected").text() + "(";
+
             $("#FormularView").val(baseFormular);
             $("#Formular").val(baseFormular);
             
+        }
+
+        function setFormularOper() {
+            if ($("#ddlFormularOper :selected").text() != "") {
+                if ($("#ddlFormularFunc :selected").text() == "=()") //Custom formular
+                {
+                    $("#FormularView").val($("#FormularView").val() + $("#ddlFormularOper :selected").text() + "");
+                    $("#Formular").val($("#Formular ").val() + $("#ddlFormularOper").val());
+                }
+                else {
+                    //FormularView = $("#FormularView").val() + $("#ddlFormularOper :selected").text();
+                    $("#FormularView").val($("#FormularView").val() + "[" + $("#ddlFormularOper :selected").text() + "]");
+                    $("#Formular").val($("#Formular").val() + "[" + $("#ddlFormularOper :selected").text() + "]");
+                }
+            }       
         }
      
         //=() || [Formular_Definition]
         //Function ([Source Data]|LibraryGuid.FieldGuid],[Target_LibraryGuid.Target_FieldGuid])
 
         function updateForumlar() {
-            FormularView = "[" + $("#FormularLibraryGuid :selected").text() + "." + $("#CalculatedField :selected").text() + "])";           
-            FormularView = $("#FormularView").val() + FormularView;
-            $("#FormularView").val(FormularView.replaceAll(")[", ",["));
+            if ($("#ddlFormularFunc :selected").text() == "=()")
+            {
+                FormularView = "[" + $("#FormularLibraryGuid :selected").text() + "." + $("#CalculatedField :selected").text() + "]";
+                FormularView = $("#FormularView").val() + FormularView;
+                $("#FormularView").val(FormularView.replaceAll(")[", ",["));
 
-            FormularRaw = "[" + $("#CalculatedField :selected").val() + "])";
-            FormularRaw = $("#Formular").val() + FormularRaw;
-            $("#Formular").val(FormularRaw.replaceAll(")[", ",["));          
+                FormularRaw = "[" + $("#CalculatedField :selected").val() + "]";
+                FormularRaw = $("#Formular").val() + FormularRaw;
+                $("#Formular").val(FormularRaw); 
+                console.log(FormularRaw);
+            }
+            else
+            {
+                FormularView = "[" + $("#FormularLibraryGuid :selected").text() + "." + $("#CalculatedField :selected").text() + "])";
+                FormularView = $("#FormularView").val() + FormularView;
+                $("#FormularView").val(FormularView.replaceAll(")[", ",["));
+
+                FormularRaw = "[" + $("#CalculatedField :selected").val() + "])";
+                FormularRaw = $("#Formular").val() + FormularRaw;
+                $("#Formular").val(FormularRaw.replaceAll(")[", ",["));          
+            }
+           
         }
 
         function resetFormular() {
