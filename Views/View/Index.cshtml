@@ -321,7 +321,10 @@
                     if (currencyIndex > -1) {
                         $(row).find("td.classCurrency").each(function () {
                             if ($(this).html().indexOf("-") > -1)
-                                $(this).css("color", "red");
+                                $(this).css("color", "#C82333");
+                            else {
+                                $(this).css("color", "#007bff"); 
+                            }
                             $(this).html(accounting.formatMoney($(this).html()));
                         })
                     }
