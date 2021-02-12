@@ -22,9 +22,11 @@ namespace DynamicData.Controllers
         }
 
 
-        public IActionResult Login()
+        public IActionResult Login(string ReturnUrl)           
         {
-            return View();
+            Login login = new Login();
+            login.ReturnUrl = ReturnUrl;
+            return View(login);
         }
 
         [HttpPost]
@@ -33,6 +35,7 @@ namespace DynamicData.Controllers
         {
             try
             {
+                //string path = HttpContext.Request.QueryString["ReturnUrl"].T
                 login.Password = HashPassword.DoHash(login.Password.Trim());
                 var user = _context.User
                     .Include(u => u.UserRole)
@@ -77,8 +80,11 @@ namespace DynamicData.Controllers
 
                     var principal = new ClaimsPrincipal(identity);
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                    return RedirectToAction("Index", "Home");
+                    string returnUrl = (string)login.ReturnUrl;
+                    if (!string.IsNullOrEmpty(returnUrl))
+                        return Redirect(returnUrl);
+                    else
+                        return RedirectToAction("Index", "Home");
                 }
             }
             catch (Exception ex)

@@ -1,4 +1,6 @@
 ﻿@{ Layout = null; }
+@model DynamicData.Models.Login
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,7 +56,7 @@
                     </div>
                     <div class="row">
                         <div class="col-8">
-
+                            @Html.HiddenFor(model => model.ReturnUrl)
                         </div>
                         <!-- /.col -->
                         <div class="col-4">
@@ -62,6 +64,7 @@
                         </div>
                         <!-- /.col -->
                     </div>
+                 
                 </form>
 
             </div>
